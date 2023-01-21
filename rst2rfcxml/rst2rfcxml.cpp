@@ -64,6 +64,7 @@ string rst2rfcxml::replace_constant_width_instances(string line) const
 	return line;
 }
 
+// Process a single line of input.
 void rst2rfcxml::process_line(string line, ostream& output_stream)
 {
 	line = replace_constant_width_instances(line);
@@ -165,8 +166,13 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 		output_stream << "<t>";
 		_contexts.push(rst_context::PARAGRAPH);
 	}
-
-	if (!_previous_line.empty()) {
+	if (_previous_line.starts_with("* ")) {
+		if (_contexts.empty() || _contexts.top() != rst_context::UNORDERED_LIST) {
+			output_stream << "<ul>" << endl;
+			_contexts.push(rst_context::UNORDERED_LIST);
+		}
+		output_stream << format("<li>{}</li>", _previous_line.substr(2)) << endl;
+	} else if (!_previous_line.empty()) {
 		output_stream << _previous_line << endl;
 	}
 
@@ -196,6 +202,7 @@ void rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_str
 	process_line({}, output_stream);
 }
 
+// Process multiple input files that contribute to an output file.
 void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {
 	for (auto input_filename : input_filenames) {
