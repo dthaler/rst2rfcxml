@@ -32,41 +32,72 @@ void rst2rfcxml::output_header(ostream& output_stream)
 
 )";
 
-	output_stream << std::format("<rfc ipr=\"{}\" docName=\"{}\" category=\"{}\">", _ipr, _document_name, _category) << endl << endl;
+	output_stream << format("<rfc ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\">", _ipr, _document_name, _category, _submission_type) << endl << endl;
+	_contexts.push(xml_context::RFC);
 	output_stream << "  <front>" << endl;
-	output_stream << "  </front>" << endl << endl;
-	output_stream << "  <middle>" << endl;
+	_contexts.push(xml_context::FRONT);
+}
+
+void output_optional_attribute(std::ostream& output_stream, string name, string value)
+{
+	if (!value.empty()) {
+		output_stream << format(" {}=\"{}\"", name, value);
+	}
+}
+
+void rst2rfcxml::output_authors(std::ostream& output_stream)
+{
+	for (auto author : _authors) {
+		output_stream << format("<author fullname=\"{}\"", author.fullname);
+		output_optional_attribute(output_stream, "initials", author.initials);
+		output_optional_attribute(output_stream, "surname", author.surname);
+		output_optional_attribute(output_stream, "role", author.role);
+		output_stream << "></author>" << endl;
+	}
+}
+
+void rst2rfcxml::pop_context(std::ostream& output_stream)
+{
+	switch (_contexts.top()) {
+	case xml_context::ABSTRACT:
+		output_stream << "</abstract>" << endl;
+		break;
+	case xml_context::BACK:
+		output_stream << "</back>" << endl;
+		break;
+	case xml_context::FRONT:
+		output_stream << "</front>" << endl;
+		break;
+	case xml_context::LIST_ELEMENT:
+		output_stream << "</li>" << endl;
+		break;
+	case xml_context::MIDDLE:
+		output_stream << "</middle>" << endl;
+		break;
+	case xml_context::RFC:
+		output_stream << "</rfc>" << endl;
+		break;
+	case xml_context::SECTION:
+		output_stream << "</section>" << endl;
+		break;
+	case xml_context::TEXT:
+		output_stream << "</t>" << endl;
+		break;
+	case xml_context::UNORDERED_LIST:
+		output_stream << "</ul>" << endl;
+		break;
+
+	default:
+		break;
+	}
+	_contexts.pop();
 }
 
 void rst2rfcxml::pop_contexts(int level, ostream& output_stream)
 {
 	while (_contexts.size() > level) {
-		switch (_contexts.top()) {
-		case rst_context::TEXT:
-			output_stream << "</t>" << endl;
-			break;
-		case rst_context::SECTION:
-			output_stream << "</section>" << endl;
-			break;
-		case rst_context::UNORDERED_LIST:
-			output_stream << "</ul>" << endl;
-			break;
-
-		default:
-			break;
-		}
-		_contexts.pop();
+		pop_context(output_stream);
 	}
-}
-
-// Output XML footer.
-void rst2rfcxml::output_footer(ostream& output_stream)
-{
-	pop_contexts(0, output_stream);
-	output_stream << "  </middle>" << endl;
-	output_stream << "  <back>" << endl;
-	output_stream << "  </back>" << endl;
-	output_stream << "</rfc>" << endl;
 }
 
 // Replace occurrences of ``foo`` with <tt>foo</tt>.
@@ -110,6 +141,8 @@ std::string rst2rfcxml::handle_escapes(std::string line) const
 	return line;
 }
 
+constexpr int BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
+
 // Process a single line of input.
 void rst2rfcxml::process_line(string line, ostream& output_stream)
 {
@@ -133,9 +166,39 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		_ipr = line.substr(ipr_prefix.length());
 		return;
 	}
+	string author_fullname_prefix = ".. |authorFullname| replace:: ";
+	if (line.starts_with(author_fullname_prefix)) {
+		author author;
+		author.fullname = line.substr(author_fullname_prefix.length());
+		_authors.push_back(author);
+		return;
+	}
+	string author_role_prefix = ".. |authorRole| replace:: ";
+	if (line.starts_with(author_role_prefix)) {
+		author& author = _authors.back();
+		author.role = line.substr(author_role_prefix.length());
+		return;
+	}
+	string author_surname_prefix = ".. |authorSurname| replace:: ";
+	if (line.starts_with(author_surname_prefix)) {
+		author& author = _authors.back();
+		author.surname = line.substr(author_surname_prefix.length());
+		return;
+	}
+	string author_initials_prefix = ".. |authorInitials| replace:: ";
+	if (line.starts_with(author_initials_prefix)) {
+		author& author = _authors.back();
+		author.initials = line.substr(author_initials_prefix.length());
+		return;
+	}
 	string category_prefix = ".. |category| replace:: ";
 	if (line.starts_with(category_prefix)) {
 		_category = line.substr(category_prefix.length());
+		return;
+	}
+	string submission_type_prefix = ".. |submissionType| replace:: ";
+	if (line.starts_with(submission_type_prefix)) {
+		_submission_type = line.substr(submission_type_prefix.length());
 		return;
 	}
 	string docname_prefix = ".. |docName| replace:: ";
@@ -154,41 +217,46 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		return;
 	}
 	if (line.starts_with("=") && line.find_first_not_of("=", 0) == string::npos) {
-		if (!_contexts.empty() && (_contexts.top() == rst_context::TITLE)) {
+		if (in_context(xml_context::TITLE)) {
 			_contexts.pop(); // End of title.
 			return;
 		}
 
 		// Title marker begins after a blank line.
 		if (_previous_line.find_first_not_of(" ") == string::npos) {
-			_contexts.push(rst_context::TITLE);
+			_contexts.push(xml_context::TITLE);
 			return;
 		}
 
 		// Previous line is a L1 section heading.
-		pop_contexts(0, output_stream);
+		pop_contexts(BASE_SECTION_LEVEL, output_stream);
+		if (in_context(xml_context::FRONT)) {
+			pop_contexts(1, output_stream);
+			output_stream << "<middle>" << endl;
+			_contexts.push(xml_context::MIDDLE);
+		}
 		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
-		_contexts.push(rst_context::SECTION);
+		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return;
 	}
 	if (line.starts_with("-") && line.find_first_not_of("-", 0) == string::npos) {
 		// Previous line is a L2 section heading.
-		pop_contexts(1, output_stream);
+		pop_contexts(BASE_SECTION_LEVEL + 1, output_stream);
 		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
-		_contexts.push(rst_context::SECTION);
+		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return;
 	}
 	if (line.starts_with("~") && line.find_first_not_of("~", 0) == string::npos) {
 		// Previous line is a L3 section heading.
-		pop_contexts(2, output_stream);
+		pop_contexts(BASE_SECTION_LEVEL + 2, output_stream);
 		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
-		_contexts.push(rst_context::SECTION);
+		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return;
 	}
-	if (!_contexts.empty() && _contexts.top() == rst_context::TITLE) {
+	if (in_context(xml_context::TITLE)) {
 		output_stream << format("<title abbrev=\"{}\">{}</title>", _abbreviated_title, line) << endl;
 		return;
 	}
@@ -197,19 +265,33 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 	_previous_line = line;
 }
 
+bool rst2rfcxml::in_context(xml_context context) const
+{
+	return (!_contexts.empty() && _contexts.top() == context);
+}
+
 // Output the previous line.
 void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 {
 	if (_previous_line.starts_with("* ")) {
-		if (_contexts.empty() || _contexts.top() != rst_context::UNORDERED_LIST) {
-			output_stream << "<ul>" << endl;
-			_contexts.push(rst_context::UNORDERED_LIST);
+		if (in_context(xml_context::LIST_ELEMENT)) {
+			pop_context(output_stream);
 		}
-		output_stream << format("<li>{}</li>", _previous_line.substr(2)) << endl;
+		if (!in_context(xml_context::UNORDERED_LIST)) {
+			output_stream << "<ul>" << endl;
+			_contexts.push(xml_context::UNORDERED_LIST);
+		}
+		output_stream << format("<li>{}", _previous_line.substr(2)) << endl;
+		_contexts.push(xml_context::LIST_ELEMENT);
 	} else if (_previous_line.find_first_not_of(" ") != string::npos) {
-		if (_contexts.empty() || _contexts.top() != rst_context::TEXT) {
+		if (!in_context(xml_context::TEXT)) {
+			if (in_context(xml_context::FRONT)) {
+				output_authors(output_stream);
+				output_stream << "<abstract>" << endl;
+				_contexts.push(xml_context::ABSTRACT);
+			}
 			output_stream << "<t>" << endl;
-			_contexts.push(rst_context::TEXT);
+			_contexts.push(xml_context::TEXT);
 		}
 		output_stream << _previous_line << endl;
 	}
@@ -217,12 +299,10 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 	if (_previous_line.find_first_not_of(" ") == string::npos) {
 		// End any contexts that end at a blank line.
 		while (!_contexts.empty()) {
-			if (_contexts.top() == rst_context::TEXT) {
-				output_stream << "</t>" << endl;
-				_contexts.pop();
-			} else if (_contexts.top() == rst_context::UNORDERED_LIST) {
-				output_stream << "</ul>" << endl;
-				_contexts.pop();
+			if (in_context(xml_context::LIST_ELEMENT) ||
+				in_context(xml_context::TEXT) ||
+				in_context(xml_context::UNORDERED_LIST)) {
+				pop_context(output_stream);
 			} else {
 				break;
 			}
@@ -247,7 +327,7 @@ void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_s
 		ifstream input_file(input_filename);
 		process_input_stream(input_file, output_stream);
 	}
-	output_footer(output_stream);
+	pop_contexts(0, output_stream);
 }
 
 int main(int argc, char** argv)
