@@ -9,6 +9,7 @@
 
 using namespace std;
 
+// Output XML header.
 void rst2rfcxml::output_header(ostream& output_stream) const
 {
 	output_stream << R"(<?xml version="1.0" encoding="UTF-8"?>
@@ -37,6 +38,7 @@ void rst2rfcxml::output_header(ostream& output_stream) const
 	output_stream << "  <middle>" << endl;
 }
 
+// Output XML footer.
 void rst2rfcxml::output_footer(ostream& output_stream) const
 {
 	output_stream << "  </middle>" << endl;
@@ -45,8 +47,27 @@ void rst2rfcxml::output_footer(ostream& output_stream) const
 	output_stream << "</rfc>" << endl;
 }
 
+// Replace occurrences of ``foo`` with <tt>foo</tt>.
+string rst2rfcxml::replace_constant_width_instances(string line) const
+{
+	size_t index;
+	while ((index = line.find("``")) != string::npos) {
+		size_t next_index = line.find("``", index + 2);
+		if (next_index == string::npos) {
+			break;
+		}
+		string before = line.substr(0, index);
+		string middle = line.substr(index + 2, next_index - index - 2);
+		string after = line.substr(next_index + 2);
+		line = format("{}<tt>{}</tt>{}", before, middle, after);
+	}
+	return line;
+}
+
 void rst2rfcxml::process_line(string line, ostream& output_stream)
 {
+	line = replace_constant_width_instances(line);
+
 	if (line == ".. contents::") {
 		// Include table of contents.
 		// This is already the default in rfc2xml.
@@ -84,15 +105,15 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		output_header(output_stream);
 		return;
 	}
-	if (line.starts_with("=") && line.find_first_not_of("=", 0) == -1) {
-		if (_context == rst_context::TITLE) {
-			_context = rst_context::NONE; // End of title.
+	if (line.starts_with("=") && line.find_first_not_of("=", 0) == string::npos) {
+		if (!_contexts.empty() && (_contexts.top() == rst_context::TITLE)) {
+			_contexts.pop(); // End of title.
 			return;
 		}
 
 		// Title marker begins after a blank line.
-		if (_previous_line.find_first_not_of(" ") == -1) {
-			_context = rst_context::TITLE;
+		if (_previous_line.find_first_not_of(" ") == string::npos) {
+			_contexts.push(rst_context::TITLE);
 			return;
 		}
 
@@ -106,7 +127,7 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		_previous_line.clear();
 		return;
 	}
-	if (line.starts_with("-") && line.find_first_not_of("-", 0) == -1) {
+	if (line.starts_with("-") && line.find_first_not_of("-", 0) == string::npos) {
 		// Previous line is a L2 section heading.
 		while (_section_depth > 1) {
 			output_stream << "</section>" << endl;
@@ -117,7 +138,7 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		_previous_line.clear();
 		return;
 	}
-	if (line.starts_with("~") && line.find_first_not_of("~", 0) == -1) {
+	if (line.starts_with("~") && line.find_first_not_of("~", 0) == string::npos) {
 		// Previous line is a L3 section heading.
 		while (_section_depth > 2) {
 			output_stream << "</section>" << endl;
@@ -128,17 +149,45 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		_previous_line.clear();
 		return;
 	}
-	if (_context == rst_context::TITLE) {
+	if (!_contexts.empty() && _contexts.top() == rst_context::TITLE) {
 		output_stream << format("<title abbrev=\"{}\">{}</title>", _abbreviated_title, line) << endl;
 		return;
 	}
 
-	// By default, just output the previous line.
-	output_stream << _previous_line << endl;
+	output_previous_line(output_stream);
 	_previous_line = line;
 }
 
-void rst2rfcxml::process_file(istream& input_stream, ostream& output_stream)
+// Output the previous line.
+void rst2rfcxml::output_previous_line(std::ostream& output_stream)
+{
+	if (_contexts.empty() && _previous_line.find_first_not_of(" ") != string::npos) {
+		output_stream << "<t>";
+		_contexts.push(rst_context::PARAGRAPH);
+	}
+
+	if (!_previous_line.empty()) {
+		output_stream << _previous_line << endl;
+	}
+
+	if (_previous_line.find_first_not_of(" ") == string::npos) {
+		// End any contexts that end at a blank line.
+		while (!_contexts.empty()) {
+			if (_contexts.top() == rst_context::PARAGRAPH) {
+				output_stream << "</t>" << endl;
+				_contexts.pop();
+			} else if (_contexts.top() == rst_context::UNORDERED_LIST) {
+				output_stream << "</ul>" << endl;
+				_contexts.pop();
+			} else {
+				break;
+			}
+		}
+	}
+}
+
+// Process all lines in an input stream.
+void rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_stream)
 {
 	string line;
 	while (getline(input_stream, line)) {
@@ -151,7 +200,7 @@ void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_s
 {
 	for (auto input_filename : input_filenames) {
 		ifstream input_file(input_filename);
-		process_file(input_file, output_stream);
+		process_input_stream(input_file, output_stream);
 	}
 	output_footer(output_stream);
 }
