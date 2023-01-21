@@ -9,6 +9,9 @@
 enum class xml_context {
     ABSTRACT,
     BACK,
+    DEFINITION_LIST,
+    DEFINITION_TERM,
+    DEFINITION_DESCRIPTION,
     FRONT,
     LIST_ELEMENT,
     MIDDLE,
@@ -34,16 +37,17 @@ public:
     void process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
 
 private:
-    std::string replace_constant_width_instances(std::string line) const;
-    std::string handle_escapes(std::string line) const;
     void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
     void process_line(std::string line, std::ostream& output_stream);
     void output_previous_line(std::ostream& output_stream);
     void output_header(std::ostream& output_stream);
-    void output_authors(std::ostream& output_stream);
+    void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
     bool in_context(xml_context context) const;
+    bool handle_replacements(std::string line);
+    bool handle_table_line(std::string line, std::ostream& output_stream);
+    bool handle_title_line(std::string line, std::ostream& output_stream);
 
     std::string _document_name;
     std::string _ipr;
