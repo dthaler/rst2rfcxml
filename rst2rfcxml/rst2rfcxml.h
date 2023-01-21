@@ -7,16 +7,19 @@
 #include <stack>
 
 enum class xml_context {
-    RFC,
-    FRONT,
     ABSTRACT,
-    MIDDLE,
     BACK,
-    TITLE,
-    SECTION,
-    TEXT,
-    UNORDERED_LIST,
+    FRONT,
     LIST_ELEMENT,
+    MIDDLE,
+    RFC,
+    SECTION,
+    TABLE,
+    TABLE_HEADER,
+    TABLE_BODY,
+    TEXT,
+    TITLE,
+    UNORDERED_LIST,
 };
 
 struct author {
@@ -45,6 +48,7 @@ private:
     std::string _document_name;
     std::string _ipr;
     std::string _category;
+    std::vector<size_t> _column_indices;
     std::vector<author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;

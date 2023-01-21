@@ -80,19 +80,28 @@ void rst2rfcxml::pop_context(std::ostream& output_stream)
 	case xml_context::SECTION:
 		output_stream << "</section>" << endl;
 		break;
+	case xml_context::TABLE:
+		output_stream << "</table>" << endl;
+		break;
+	case xml_context::TABLE_BODY:
+		output_stream << "</tbody>" << endl;
+		break;
+	case xml_context::TABLE_HEADER:
+		output_stream << "</tr></thead>" << endl;
+		break;
 	case xml_context::TEXT:
 		output_stream << "</t>" << endl;
 		break;
 	case xml_context::UNORDERED_LIST:
 		output_stream << "</ul>" << endl;
 		break;
-
 	default:
 		break;
 	}
 	_contexts.pop();
 }
 
+// Pop all XML contexts until we are down to a specified XML level.
 void rst2rfcxml::pop_contexts(int level, ostream& output_stream)
 {
 	while (_contexts.size() > level) {
@@ -260,7 +269,62 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		output_stream << format("<title abbrev=\"{}\">{}</title>", _abbreviated_title, line) << endl;
 		return;
 	}
+	if (line.find_first_not_of(" ") != string::npos &&
+		line.find_first_not_of(" =") == string::npos) {
+		if (in_context(xml_context::TABLE_BODY)) {
+			pop_context(output_stream); // TABLE_BODY
+			pop_context(output_stream); // TABLE
+			_column_indices.clear();
+			return;
+		} else if (in_context(xml_context::TABLE_HEADER)) {
+			pop_context(output_stream); // TABLE_HEADER
+			output_stream << "<tbody>" << endl;
+			_contexts.push(xml_context::TABLE_BODY);
+			return;
+		} else {
+			if (in_context(xml_context::TEXT)) {
+				pop_context(output_stream); // TEXT
+			}
+			output_stream << "<table><thead><tr>" << endl;
+			_contexts.push(xml_context::TABLE);
+			_contexts.push(xml_context::TABLE_HEADER);
 
+			// Find column indices.
+			size_t index = line.find_first_of("=");
+			while (index != string::npos) {
+				_column_indices.push_back(index);
+				index = line.find_first_not_of("=", index);
+				if (index == string::npos) {
+					break;
+				}
+				index = line.find_first_of("=", index);
+			}
+			return;
+		}
+	}
+	if (in_context(xml_context::TABLE_HEADER)) {
+		for (int column = 0; column < _column_indices.size(); column++) {
+			size_t start = _column_indices[column];
+			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
+			string value = line.substr(start, count);
+			output_stream << format("<th>{}</th>", value) << endl;
+		}
+		return;
+	}
+	if (in_context(xml_context::TABLE_BODY)) {
+		output_stream << "<tr>" << endl;
+		for (int column = 0; column < _column_indices.size(); column++) {
+			size_t start = _column_indices[column];
+			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
+			if (line.length() < start) {
+				break;
+			}
+			string value = line.substr(start, count);
+			output_stream << format("<td>{}</td>", value) << endl;
+		}
+		output_stream << "</tr>" << endl;
+		return;
+	}
 	output_previous_line(output_stream);
 	_previous_line = line;
 }
