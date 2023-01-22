@@ -10,9 +10,33 @@
 
 using namespace std;
 
-string trim(string s) {
-	regex e("^\\s+|\\s+$");   // remove leading and trailing spaces
+// Remove whitespace from beginning and end of string.
+static string _trim(string s) {
+	regex e("^\\s+|\\s+$");
 	return regex_replace(s, e, "");
+}
+
+static string _anchor(string value)
+{
+	const string legal_first_character = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_:";
+	const string legal_anchor_characters = legal_first_character + "1234567890-.";
+	string anchor = "";
+	for (size_t i = 0; i < value.length(); i++) {
+		char c = value[i];
+		if (legal_anchor_characters.find(c) == string::npos) {
+			// Drop disallowed characters.
+			continue;
+		}
+		if (anchor.empty() && legal_first_character.find(c) == string::npos) {
+			// Drop disallowed start characters.
+			continue;
+		}
+		if (isupper(c)) {
+			c = tolower(c);
+		}
+		anchor += c;
+	}
+	return anchor;
 }
 
 // Output XML header.
@@ -44,14 +68,14 @@ void rst2rfcxml::output_header(ostream& output_stream)
 	_contexts.push(xml_context::FRONT);
 }
 
-static void _output_optional_attribute(std::ostream& output_stream, string name, string value)
+static void _output_optional_attribute(ostream& output_stream, string name, string value)
 {
 	if (!value.empty()) {
 		output_stream << format(" {}=\"{}\"", name, value);
 	}
 }
 
-void rst2rfcxml::output_authors(std::ostream& output_stream) const
+void rst2rfcxml::output_authors(ostream& output_stream) const
 {
 	for (auto author : _authors) {
 		output_stream << format("<author fullname=\"{}\"", author.fullname);
@@ -62,7 +86,7 @@ void rst2rfcxml::output_authors(std::ostream& output_stream) const
 	}
 }
 
-void rst2rfcxml::pop_context(std::ostream& output_stream)
+void rst2rfcxml::pop_context(ostream& output_stream)
 {
 	switch (_contexts.top()) {
 	case xml_context::ABSTRACT:
@@ -136,13 +160,13 @@ string _replace_constant_width_instances(string line)
 		string before = line.substr(0, index);
 		string middle = line.substr(index + 2, next_index - index - 2);
 		string after = line.substr(next_index + 2);
-		line = format("{}<tt>{}</tt>{}", before, trim(middle), after);
+		line = format("{}<tt>{}</tt>{}", before, _trim(middle), after);
 	}
 	return line;
 }
 
 // Given a string, replace all occurrences of a given substring.
-static std::string _replace_all(string line, string from, string to)
+static string _replace_all(string line, string from, string to)
 {
 	size_t index;
 	size_t start = 0;
@@ -153,67 +177,90 @@ static std::string _replace_all(string line, string from, string to)
 	return line;
 }
 
-// Handle escapes.
-static std::string _handle_escapes(std::string line)
+static string _replace_internal_links(string line)
 {
+	size_t start;
+	while ((start = line.find("`")) != string::npos) {
+		size_t end = line.find("`_", start + 1);
+		if (end == string::npos) {
+			break;
+		}
+		string before = line.substr(0, start);
+		string middle = line.substr(start + 1, end - start - 1);
+		string after = line.substr(end + 2);
+		line = format("{}<xref target=\"{}\"/>{}", before, _anchor(middle), after);
+	}
+	return line;
+}
+
+// Handle escapes.
+static string _handle_escapes(string line)
+{
+	// Trim whitespace.
+	line = _trim(line);
+
 	// Unescape things RST requires to be escaped.
 	line = _replace_all(line, "\\*", "*");
+	line = _replace_all(line, "\\|", "|");
 
 	// Escape things XML requires to be escaped.
 	line = _replace_all(line, "&", "&amp;");
 	line = _replace_all(line, "<", "&lt;");
 	line = _replace_all(line, ">", "&gt;");
 
+	line = _replace_constant_width_instances(line);
+	line = _replace_internal_links(line);
+
 	return line;
 }
 
 constexpr int BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
 
-static bool _handle_replacement(string line, string label, string& field)
+static bool _handle_variable_initialization(string line, string label, string& field)
 {
-	string prefix = format(".. |{}| replace:: ", trim(label));
+	string prefix = format(".. |{}| replace:: ", _trim(label));
 	if (line.starts_with(prefix)) {
-		field = _handle_escapes(trim(line.substr(prefix.length())));
+		field = _handle_escapes(line.substr(prefix.length()));
 		return true;
 	}
 	return false;
 }
 
 // Handle variable initializations. Returns true if input has been handled.
-bool rst2rfcxml::handle_replacements(string line)
+bool rst2rfcxml::handle_variable_initializations(string line)
 {
-	if (_handle_replacement(line, "category", _category) ||
-		_handle_replacement(line, "docName", _document_name) ||
-		_handle_replacement(line, "ipr", _ipr) ||
-		_handle_replacement(line, "submissionType", _submission_type) ||
-		_handle_replacement(line, "titleAbbr", _abbreviated_title)) {
+	if (_handle_variable_initialization(line, "category", _category) ||
+		_handle_variable_initialization(line, "docName", _document_name) ||
+		_handle_variable_initialization(line, "ipr", _ipr) ||
+		_handle_variable_initialization(line, "submissionType", _submission_type) ||
+		_handle_variable_initialization(line, "titleAbbr", _abbreviated_title)) {
 		return true;
 	}
 
-	// Handle author replacements.
+	// Handle author field initializations.
 	string author_fullname_prefix = ".. |authorFullname| replace:: ";
 	if (line.starts_with(author_fullname_prefix)) {
 		author author;
-		author.fullname = trim(line.substr(author_fullname_prefix.length()));
+		author.fullname = _trim(line.substr(author_fullname_prefix.length()));
 		_authors.push_back(author);
 		return true;
 	}
 	string author_role_prefix = ".. |authorRole| replace:: ";
 	if (line.starts_with(author_role_prefix)) {
 		author& author = _authors.back();
-		author.role = trim(line.substr(author_role_prefix.length()));
+		author.role = _trim(line.substr(author_role_prefix.length()));
 		return true;
 	}
 	string author_surname_prefix = ".. |authorSurname| replace:: ";
 	if (line.starts_with(author_surname_prefix)) {
 		author& author = _authors.back();
-		author.surname = trim(line.substr(author_surname_prefix.length()));
+		author.surname = _trim(line.substr(author_surname_prefix.length()));
 		return true;
 	}
 	string author_initials_prefix = ".. |authorInitials| replace:: ";
 	if (line.starts_with(author_initials_prefix)) {
 		author& author = _authors.back();
-		author.initials = trim(line.substr(author_initials_prefix.length()));
+		author.initials = _trim(line.substr(author_initials_prefix.length()));
 		return true;
 	}
 	return false;
@@ -266,7 +313,7 @@ bool rst2rfcxml::handle_table_line(string line, ostream& output_stream)
 			size_t start = _column_indices[column];
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			if (line.length() > start) {
-				string value = _handle_escapes(trim(line.substr(start, count)));
+				string value = _handle_escapes(line.substr(start, count));
 				output_stream << format("  <th>{}</th>", value) << endl;
 			}
 		}
@@ -281,7 +328,7 @@ bool rst2rfcxml::handle_table_line(string line, ostream& output_stream)
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			string value;
 			if (line.length() >= start) {
-				value = _handle_escapes(trim(line.substr(start, count)));
+				value = _handle_escapes(line.substr(start, count));
 			}
 			output_stream << format("  <td>{}</td>", value) << endl;
 		}
@@ -314,7 +361,8 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 			output_stream << "<middle>" << endl;
 			_contexts.push(xml_context::MIDDLE);
 		}
-		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
+		string title = _handle_escapes(_previous_line);
+		output_stream << format("<section anchor=\"{}\" title=\"{}\">", _anchor(title), title) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -322,7 +370,8 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 	if (line.starts_with("-") && line.find_first_not_of("-", 0) == string::npos) {
 		// Previous line is a L2 section heading.
 		pop_contexts(BASE_SECTION_LEVEL + 1, output_stream);
-		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
+		string title = _handle_escapes(_previous_line);
+		output_stream << format("<section anchor=\"{}\" title=\"{}\">", _anchor(title), title) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -330,7 +379,8 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 	if (line.starts_with("~") && line.find_first_not_of("~", 0) == string::npos) {
 		// Previous line is a L3 section heading.
 		pop_contexts(BASE_SECTION_LEVEL + 2, output_stream);
-		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
+		string title = _handle_escapes(_previous_line);
+		output_stream << format("<section anchor=\"{}\" title=\"{}\">", _anchor(title), title) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -372,8 +422,8 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 	}
 
 	line = _handle_escapes(line);
-	line = _replace_constant_width_instances(line);
-	if (handle_replacements(line)) {
+
+	if (handle_variable_initializations(line)) {
 		return;
 	}
 
@@ -397,7 +447,7 @@ bool rst2rfcxml::in_context(xml_context context) const
 }
 
 // Output the previous line.
-void rst2rfcxml::output_previous_line(std::ostream& output_stream)
+void rst2rfcxml::output_previous_line(ostream& output_stream)
 {
 	if (_previous_line.starts_with("* ")) {
 		if (in_context(xml_context::LIST_ELEMENT)) {
@@ -407,7 +457,7 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 			output_stream << "<ul>" << endl;
 			_contexts.push(xml_context::UNORDERED_LIST);
 		}
-		output_stream << format("<li>{}", trim(_previous_line.substr(2))) << endl;
+		output_stream << format("<li>{}", _trim(_previous_line.substr(2))) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
 	} else if (_previous_line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && _previous_line.starts_with("  ")) {
@@ -428,7 +478,7 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 			output_stream << "<t>" << endl;
 			_contexts.push(xml_context::TEXT);
 		}
-		output_stream << trim(_previous_line) << endl;
+		output_stream << _trim(_previous_line) << endl;
 	}
 
 	if (_previous_line.find_first_not_of(" ") == string::npos) {

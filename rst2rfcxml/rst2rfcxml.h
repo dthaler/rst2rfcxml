@@ -45,7 +45,7 @@ private:
     void pop_context(std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
     bool in_context(xml_context context) const;
-    bool handle_replacements(std::string line);
+    bool handle_variable_initializations(std::string line);
     bool handle_table_line(std::string line, std::ostream& output_stream);
     bool handle_title_line(std::string line, std::ostream& output_stream);
 
