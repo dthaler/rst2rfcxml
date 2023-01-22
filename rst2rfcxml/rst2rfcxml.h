@@ -18,6 +18,7 @@ enum class xml_context {
     MIDDLE,
     RFC,
     SECTION,
+    SOURCE_CODE,
     TABLE,
     TABLE_HEADER,
     TABLE_BODY,
@@ -39,8 +40,8 @@ public:
 
 private:
     void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
-    void process_line(std::string line, std::ostream& output_stream);
-    void output_previous_line(std::ostream& output_stream);
+    void process_line(std::string current, std::string next, std::ostream& output_stream);
+    void output_line(std::string line, std::ostream& output_stream);
     void output_header(std::ostream& output_stream);
     void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
@@ -48,8 +49,9 @@ private:
     void pop_contexts_until(xml_context end, std::ostream& output_stream);
     bool in_context(xml_context context) const;
     bool handle_variable_initializations(std::string line);
-    bool handle_table_line(std::string line, std::ostream& output_stream);
-    bool handle_title_line(std::string line, std::ostream& output_stream);
+    bool handle_table_line(std::string current, std::string next, std::ostream& output_stream);
+    bool handle_title_line(std::string current, std::string next, std::ostream& output_stream);
+    bool handle_section_title(int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
 
     std::string _document_name;
     std::string _ipr;
@@ -59,6 +61,7 @@ private:
     std::string _submission_type;
     std::string _abbreviated_title;
     std::stack<xml_context> _contexts;
+    bool _source_code_skip_blank_lines;
 
     // Some RST markup modifies the previous line, so we need to
     // keep track of the previous line and process it only after
