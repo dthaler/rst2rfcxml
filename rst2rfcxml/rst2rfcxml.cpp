@@ -2,12 +2,18 @@
 // SPDX-License-Identifier: MIT
 
 #include <fstream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include "..\external\CLI11.HPP"
 #include "rst2rfcxml.h"
 
 using namespace std;
+
+string trim(string s) {
+	regex e("^\\s+|\\s+$");   // remove leading and trailing spaces
+	return regex_replace(s, e, "");
+}
 
 // Output XML header.
 void rst2rfcxml::output_header(ostream& output_stream)
@@ -130,7 +136,7 @@ string _replace_constant_width_instances(string line)
 		string before = line.substr(0, index);
 		string middle = line.substr(index + 2, next_index - index - 2);
 		string after = line.substr(next_index + 2);
-		line = format("{}<tt>{}</tt>{}", before, middle, after);
+		line = format("{}<tt>{}</tt>{}", before, trim(middle), after);
 	}
 	return line;
 }
@@ -165,9 +171,9 @@ constexpr int BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
 
 static bool _handle_replacement(string line, string label, string& field)
 {
-	string prefix = format(".. |{}| replace:: ", label);
+	string prefix = format(".. |{}| replace:: ", trim(label));
 	if (line.starts_with(prefix)) {
-		field = line.substr(prefix.length());
+		field = _handle_escapes(trim(line.substr(prefix.length())));
 		return true;
 	}
 	return false;
@@ -188,26 +194,26 @@ bool rst2rfcxml::handle_replacements(string line)
 	string author_fullname_prefix = ".. |authorFullname| replace:: ";
 	if (line.starts_with(author_fullname_prefix)) {
 		author author;
-		author.fullname = line.substr(author_fullname_prefix.length());
+		author.fullname = trim(line.substr(author_fullname_prefix.length()));
 		_authors.push_back(author);
 		return true;
 	}
 	string author_role_prefix = ".. |authorRole| replace:: ";
 	if (line.starts_with(author_role_prefix)) {
 		author& author = _authors.back();
-		author.role = line.substr(author_role_prefix.length());
+		author.role = trim(line.substr(author_role_prefix.length()));
 		return true;
 	}
 	string author_surname_prefix = ".. |authorSurname| replace:: ";
 	if (line.starts_with(author_surname_prefix)) {
 		author& author = _authors.back();
-		author.surname = line.substr(author_surname_prefix.length());
+		author.surname = trim(line.substr(author_surname_prefix.length()));
 		return true;
 	}
 	string author_initials_prefix = ".. |authorInitials| replace:: ";
 	if (line.starts_with(author_initials_prefix)) {
 		author& author = _authors.back();
-		author.initials = line.substr(author_initials_prefix.length());
+		author.initials = trim(line.substr(author_initials_prefix.length()));
 		return true;
 	}
 	return false;
@@ -227,7 +233,7 @@ bool rst2rfcxml::handle_table_line(string line, ostream& output_stream)
 		}
 		if (in_context(xml_context::TABLE_HEADER)) {
 			pop_context(output_stream); // TABLE_HEADER
-			output_stream << "<tbody>" << endl;
+			output_stream << " <tbody>" << endl;
 			_contexts.push(xml_context::TABLE_BODY);
 			return true;
 		}
@@ -259,25 +265,27 @@ bool rst2rfcxml::handle_table_line(string line, ostream& output_stream)
 		for (int column = 0; column < _column_indices.size(); column++) {
 			size_t start = _column_indices[column];
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
-			string value = line.substr(start, count);
-			output_stream << format("<th>{}</th>", value) << endl;
+			if (line.length() > start) {
+				string value = _handle_escapes(trim(line.substr(start, count)));
+				output_stream << format("  <th>{}</th>", value) << endl;
+			}
 		}
 		return true;
 	}
 
 	// Process a table body line.
 	if (in_context(xml_context::TABLE_BODY)) {
-		output_stream << "<tr>" << endl;
+		output_stream << " <tr>" << endl;
 		for (int column = 0; column < _column_indices.size(); column++) {
 			size_t start = _column_indices[column];
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
-			if (line.length() < start) {
-				break;
+			string value;
+			if (line.length() >= start) {
+				value = _handle_escapes(trim(line.substr(start, count)));
 			}
-			string value = line.substr(start, count);
-			output_stream << format("<td>{}</td>", value) << endl;
+			output_stream << format("  <td>{}</td>", value) << endl;
 		}
-		output_stream << "</tr>" << endl;
+		output_stream << " </tr>" << endl;
 		return true;
 	}
 
@@ -306,7 +314,7 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 			output_stream << "<middle>" << endl;
 			_contexts.push(xml_context::MIDDLE);
 		}
-		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
+		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -314,7 +322,7 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 	if (line.starts_with("-") && line.find_first_not_of("-", 0) == string::npos) {
 		// Previous line is a L2 section heading.
 		pop_contexts(BASE_SECTION_LEVEL + 1, output_stream);
-		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
+		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -322,7 +330,7 @@ bool rst2rfcxml::handle_title_line(string line, ostream& output_stream)
 	if (line.starts_with("~") && line.find_first_not_of("~", 0) == string::npos) {
 		// Previous line is a L3 section heading.
 		pop_contexts(BASE_SECTION_LEVEL + 2, output_stream);
-		output_stream << format("<section title=\"{}\">", _previous_line) << endl;
+		output_stream << format("<section title=\"{}\">", _handle_escapes(trim(_previous_line))) << endl;
 		_contexts.push(xml_context::SECTION);
 		_previous_line.clear();
 		return true;
@@ -352,15 +360,20 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		return;
 	}
 
-	line = _handle_escapes(line);
-	line = _replace_constant_width_instances(line);
-	if (handle_replacements(line)) {
-		return;
-	}
+	// Title lines must be handled before table lines.
 	if (handle_title_line(line, output_stream)) {
 		return;
 	}
+
+	// Handle tables first, where escapes must be dealt with per
+	// cell, in order to preserve column locations.
 	if (handle_table_line(line, output_stream)) {
+		return;
+	}
+
+	line = _handle_escapes(line);
+	line = _replace_constant_width_instances(line);
+	if (handle_replacements(line)) {
 		return;
 	}
 
@@ -394,7 +407,7 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 			output_stream << "<ul>" << endl;
 			_contexts.push(xml_context::UNORDERED_LIST);
 		}
-		output_stream << format("<li>{}", _previous_line.substr(2)) << endl;
+		output_stream << format("<li>{}", trim(_previous_line.substr(2))) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
 	} else if (_previous_line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && _previous_line.starts_with("  ")) {
@@ -415,7 +428,7 @@ void rst2rfcxml::output_previous_line(std::ostream& output_stream)
 			output_stream << "<t>" << endl;
 			_contexts.push(xml_context::TEXT);
 		}
-		output_stream << _previous_line << endl;
+		output_stream << trim(_previous_line) << endl;
 	}
 
 	if (_previous_line.find_first_not_of(" ") == string::npos) {
