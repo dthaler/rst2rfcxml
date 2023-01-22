@@ -9,6 +9,7 @@
 enum class xml_context {
     ABSTRACT,
     BACK,
+    BLOCKQUOTE,
     DEFINITION_LIST,
     DEFINITION_TERM,
     DEFINITION_DESCRIPTION,
@@ -44,6 +45,7 @@ private:
     void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
+    void pop_contexts_until(xml_context end, std::ostream& output_stream);
     bool in_context(xml_context context) const;
     bool handle_variable_initializations(std::string line);
     bool handle_table_line(std::string line, std::ostream& output_stream);

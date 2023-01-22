@@ -95,6 +95,9 @@ void rst2rfcxml::pop_context(ostream& output_stream)
 	case xml_context::BACK:
 		output_stream << "</back>" << endl;
 		break;
+	case xml_context::BLOCKQUOTE:
+		output_stream << "</blockquote>" << endl;
+		break;
 	case xml_context::DEFINITION_DESCRIPTION:
 		output_stream << "</dd>" << endl;
 		break;
@@ -144,6 +147,13 @@ void rst2rfcxml::pop_context(ostream& output_stream)
 void rst2rfcxml::pop_contexts(int level, ostream& output_stream)
 {
 	while (_contexts.size() > level) {
+		pop_context(output_stream);
+	}
+}
+
+void rst2rfcxml::pop_contexts_until(xml_context end, ostream& output_stream)
+{
+	while (_contexts.size() > 0 && _contexts.top() != end) {
 		pop_context(output_stream);
 	}
 }
@@ -202,6 +212,9 @@ static string _handle_escapes(string line)
 	// Unescape things RST requires to be escaped.
 	line = _replace_all(line, "\\*", "*");
 	line = _replace_all(line, "\\|", "|");
+	if (line.ends_with("::")) {
+		line = line.substr(0, line.length() - 1);
+	}
 
 	// Escape things XML requires to be escaped.
 	line = _replace_all(line, "&", "&amp;");
@@ -421,8 +434,6 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
 		return;
 	}
 
-	line = _handle_escapes(line);
-
 	if (handle_variable_initializations(line)) {
 		return;
 	}
@@ -437,6 +448,17 @@ void rst2rfcxml::process_line(string line, ostream& output_stream)
     	output_stream << "<dt>";
 		_contexts.push(xml_context::DEFINITION_TERM);
 	}
+
+	// Handle blockquote.
+	if (line.starts_with("  ") && (line.find_first_not_of(" ") != string::npos) &&
+		_previous_line.empty()) {
+		pop_contexts_until(xml_context::SECTION, output_stream);
+		output_stream << "<blockquote>";
+		_contexts.push(xml_context::BLOCKQUOTE);
+		_previous_line = line;
+		return;
+	}
+
 	output_previous_line(output_stream);
 	_previous_line = line;
 }
@@ -457,14 +479,15 @@ void rst2rfcxml::output_previous_line(ostream& output_stream)
 			output_stream << "<ul>" << endl;
 			_contexts.push(xml_context::UNORDERED_LIST);
 		}
-		output_stream << format("<li>{}", _trim(_previous_line.substr(2))) << endl;
+		output_stream << format("<li>{}", _handle_escapes(_previous_line.substr(2))) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
 	} else if (_previous_line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && _previous_line.starts_with("  ")) {
 			pop_context(output_stream);
 			output_stream << "<dd>";
 			_contexts.push(xml_context::DEFINITION_DESCRIPTION);
-		} else if (!in_context(xml_context::DEFINITION_DESCRIPTION) &&
+		} else if (!in_context(xml_context::BLOCKQUOTE) &&
+			!in_context(xml_context::DEFINITION_DESCRIPTION) &&
 			!in_context(xml_context::DEFINITION_TERM) &&
 			!in_context(xml_context::TEXT)) {
 			if (in_context(xml_context::FRONT)) {
@@ -478,13 +501,14 @@ void rst2rfcxml::output_previous_line(ostream& output_stream)
 			output_stream << "<t>" << endl;
 			_contexts.push(xml_context::TEXT);
 		}
-		output_stream << _trim(_previous_line) << endl;
+		output_stream << _handle_escapes(_previous_line) << endl;
 	}
 
 	if (_previous_line.find_first_not_of(" ") == string::npos) {
 		// End any contexts that end at a blank line.
 		while (!_contexts.empty()) {
-			if (in_context(xml_context::DEFINITION_DESCRIPTION) ||
+			if (in_context(xml_context::BLOCKQUOTE) ||
+				in_context(xml_context::DEFINITION_DESCRIPTION) ||
 				in_context(xml_context::LIST_ELEMENT) ||
 				in_context(xml_context::TEXT) ||
 				in_context(xml_context::UNORDERED_LIST)) {
