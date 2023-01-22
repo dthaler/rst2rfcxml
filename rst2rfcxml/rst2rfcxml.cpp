@@ -30,11 +30,13 @@ static string _anchor(string value)
 	for (size_t i = 0; i < value.length(); i++) {
 		char c = value[i];
 		if (legal_anchor_characters.find(c) == string::npos) {
-			// Drop disallowed characters.
+			// Replace disallowed characters.
+			anchor += "-";
 			continue;
 		}
 		if (anchor.empty() && legal_first_character.find(c) == string::npos) {
 			// Drop disallowed start characters.
+			anchor += "-";
 			continue;
 		}
 		if (isupper(c)) {
@@ -215,7 +217,7 @@ static string _replace_internal_links(string line)
 		string before = line.substr(0, start);
 		string middle = line.substr(start + 1, end - start - 1);
 		string after = line.substr(end + 2);
-		line = format("{}<xref target=\"{}\"/>{}", before, _anchor(middle), after);
+		line = format("{}<xref target=\"{}\">{}</xref>{}", before, _anchor(middle), middle, after);
 	}
 	return line;
 }
