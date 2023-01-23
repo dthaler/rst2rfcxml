@@ -1,5 +1,6 @@
 # rst2rfcxml
-Convert reStructured Text to rfc2xml Version 3
+Convert [reStructured Text](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html)
+to [rfc2xml Version 3](https://www.rfc-editor.org/rfc/rfc7991).
 
 ## Installation
 Clone:
@@ -39,7 +40,10 @@ Multiple input files are read as if they were one large file.
 This allows (for example) a "prologue" file to contain xml2rfc specific definitions,
 to be included before the main rst file.
 
-## Header directive
+The following subsections provide more details on the contents
+of RST files.
+
+### Header directive
 
 To generate an rfc2xml header, the header directive must be included.
 
@@ -49,7 +53,7 @@ To generate an rfc2xml header, the header directive must be included.
 
 This directive must appear after any xml2rfc specific definitions discussed below.
 
-## xml2rfc specific definitions
+### xml2rfc specific definitions
 
 The "replace" directive is used to configure xml2rfc specific definitions.
 The general syntax is:
@@ -60,7 +64,7 @@ The general syntax is:
 
 where 'name' is a string defined below, and 'value' is the value to set it to.
 
-### Common settings
+#### Common settings
 
 * docName: The filename of the draft without any extension.
 * ipr: The ipr value, such as "trust200902".
@@ -80,7 +84,7 @@ Example:
 .. |baseTargetUri| replace:: http://example.com/path
 ```
 
-### Author settings
+#### Author settings
 
 The document must have at least one author, and can have multiple authors.
 To add an author, an "authorFullname" must be set.
@@ -99,7 +103,7 @@ Example:
 .. |authorInitials| replace:: D.
 ```
 
-### External References
+#### External References
 
 RST files specify external references using the following syntax:
 
