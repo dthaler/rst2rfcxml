@@ -34,6 +34,15 @@ struct author {
     std::string role;
 };
 
+struct reference {
+    std::string anchor;
+    std::string title;
+    std::string rst_target;
+    std::string xml_target;
+    std::string type;
+    int use_count;
+};
+
 class rst2rfcxml {
 public:
     void process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
@@ -43,6 +52,8 @@ private:
     void process_line(std::string current, std::string next, std::ostream& output_stream);
     void output_line(std::string line, std::ostream& output_stream);
     void output_header(std::ostream& output_stream);
+    void output_back(std::ostream& output_stream);
+    void output_references(std::ostream& output_stream, std::string type, std::string title);
     void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
@@ -52,6 +63,8 @@ private:
     bool handle_table_line(std::string current, std::string next, std::ostream& output_stream);
     bool handle_title_line(std::string current, std::string next, std::ostream& output_stream);
     bool handle_section_title(int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
+    std::string replace_links(std::string line);
+    std::string handle_escapes_and_links(std::string line);
 
     std::string _document_name;
     std::string _ipr;
@@ -67,4 +80,7 @@ private:
     // keep track of the previous line and process it only after
     // we know whether the next one affects it.
     std::string _previous_line;
+    
+    std::map<std::string, reference> _rst_references;
+    std::map<std::string, std::string> _xml_references;
 };

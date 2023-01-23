@@ -202,7 +202,7 @@ static string _replace_all(string line, string from, string to)
 	return line;
 }
 
-static string _replace_internal_links(string line)
+string rst2rfcxml::replace_links(string line)
 {
 	size_t start;
 	while ((start = line.find("`")) != string::npos) {
@@ -210,20 +210,50 @@ static string _replace_internal_links(string line)
 		if (end == string::npos) {
 			break;
 		}
-		if ((end > 4) && (line.substr(end - 4, 4) == "&gt;")) {
-			// External references aren't yet supported (issue #1).
-			break;
-		}
 		string before = line.substr(0, start);
 		string middle = line.substr(start + 1, end - start - 1);
 		string after = line.substr(end + 2);
+
+		// Handle external reference.
+		size_t link_end = middle.find("&gt;");
+		if (link_end != string::npos) {
+			size_t title_end = middle.find("&lt;");
+			string title = _trim(middle.substr(0, title_end));
+			size_t fragment_start = middle.find("#", title_end);
+
+			string filename;
+			string fragment;
+			if (fragment_start != string::npos) {
+				filename = middle.substr(title_end + 4, fragment_start - title_end - 4);
+				fragment = middle.substr(fragment_start + 1, link_end - fragment_start - 1);
+				reference& reference = _rst_references[filename];
+				reference.use_count++;
+#if 0
+				// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
+				// if relative is present, but xml2rfc gives an error.
+				if (reference.xml_target.empty()) {
+					return format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
+				} else {
+					return format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
+				}
+#else
+				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference.anchor, title, after);
+#endif
+			} else {
+				filename = middle.substr(title_end + 4, link_end - title_end - 4);
+				reference& reference = _rst_references[filename];
+				reference.use_count++;
+				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference.anchor, title, after);
+			}
+		}
+
 		line = format("{}<xref target=\"{}\">{}</xref>{}", before, _anchor(middle), middle, after);
 	}
 	return line;
 }
 
 // Handle escapes.
-static string _handle_escapes(string line, bool trim = true)
+static string _handle_escapes(string line)
 {
 	// Trim whitespace.
 	line = _trim(line);
@@ -241,7 +271,16 @@ static string _handle_escapes(string line, bool trim = true)
 	line = _replace_all(line, ">", "&gt;");
 
 	line = _replace_constant_width_instances(line);
-	line = _replace_internal_links(line);
+
+	return line;
+}
+
+string rst2rfcxml::handle_escapes_and_links(string line)
+{
+	line = _handle_escapes(line);
+
+	// Replace links after handling escapes so we don't escape the <> in links.
+	line = replace_links(line);
 
 	return line;
 }
@@ -295,6 +334,34 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 		author.initials = _trim(line.substr(author_initials_prefix.length()));
 		return true;
 	}
+
+	// Handle reference initializations.
+	cmatch match;
+	if (regex_match(line.c_str(), match, regex(".. \\|([^\\|]*)\\| replace:: \\[([\\w-]+)\\]"))) {
+		// Create a reference.
+		reference reference;
+		reference.anchor = match[2];
+		reference.rst_target = match[1];
+		_rst_references[reference.rst_target] = reference;
+		_xml_references[reference.anchor] = reference.rst_target;
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|\\[([\\w-]+)\\]title\\| replace:: "))) {
+		reference& reference = _rst_references[_xml_references[match[1]]];
+		reference.title = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]target\\| replace:: "))) {
+		reference& reference = _rst_references[_xml_references[match[1]]];
+		reference.xml_target = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]type\\| replace:: "))) {
+		reference& reference = _rst_references[_xml_references[match[1]]];
+		reference.type = match.suffix().str();
+		return true;
+	}
+
 	return false;
 }
 
@@ -345,7 +412,7 @@ bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_
 			size_t start = _column_indices[column];
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			if (current.length() > start) {
-				string value = _handle_escapes(current.substr(start, count));
+				string value = handle_escapes_and_links(current.substr(start, count));
 				output_stream << format("{}<th>{}</th>", _spaces(_contexts.size()), value) << endl;
 			}
 		}
@@ -360,7 +427,7 @@ bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			string value;
 			if (current.length() >= start) {
-				value = _handle_escapes(current.substr(start, count));
+				value = handle_escapes_and_links(current.substr(start, count));
 			}
 			output_stream << format("{} <td>{}</td>", _spaces(_contexts.size()), value) << endl;
 		}
@@ -383,7 +450,7 @@ bool rst2rfcxml::handle_section_title(int level, string marker, string current, 
 			output_stream << " <middle>" << endl;
 			_contexts.push(xml_context::MIDDLE);
 		}
-		string title = _handle_escapes(current);
+		string title = handle_escapes_and_links(current);
 		output_stream << format("{}<section anchor=\"{}\" title=\"{}\">", _spaces(_contexts.size()), _anchor(title), title) << endl;
 		_contexts.push(xml_context::SECTION);
 		return true;
@@ -417,7 +484,7 @@ bool rst2rfcxml::handle_title_line(string current, string next, ostream& output_
 			return true;
 		}
 	} else if (in_context(xml_context::TITLE)) {
-		output_stream << _handle_escapes(current) << endl;
+		output_stream << handle_escapes_and_links(current) << endl;
 		return true;
 	}
 
@@ -540,7 +607,7 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 		}
 		output_stream << format("{}<li>", _spaces(_contexts.size())) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
-		output_stream << format("{}{}", _spaces(_contexts.size()), _handle_escapes(line.substr(2))) << endl;
+		output_stream << format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2))) << endl;
 	} else if (line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && line.starts_with("  ")) {
 			pop_context(output_stream);
@@ -563,7 +630,7 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 			output_stream << _spaces(_contexts.size()) << "<t>" << endl;
 			_contexts.push(xml_context::TEXT);
 		}
-		output_stream << _spaces(_contexts.size()) << _handle_escapes(line) << endl;
+		output_stream << _spaces(_contexts.size()) << handle_escapes_and_links(line) << endl;
 	}
 
 	if (line.find_first_not_of(" ") == string::npos) {
@@ -594,6 +661,39 @@ void rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_str
 	process_line(_previous_line, {}, output_stream);
 }
 
+void rst2rfcxml::output_references(ostream& output_stream, string type, string title)
+{
+	bool found = false;
+
+	for (auto& [_, reference] : _rst_references) {
+		if (reference.use_count == 0 || reference.type != type) {
+			continue;
+		}
+		if (!found) {
+			output_stream << format(" <references><name>{}</name>", title) << endl;
+			found = true;
+		}
+		output_stream << format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, reference.xml_target) << endl;
+		output_stream << "   <front>" << endl;
+		output_stream << "    <title>" << reference.title << "</title>" << endl;
+		output_stream << "    <author></author>" << endl;
+		output_stream << "   </front>" << endl;
+		output_stream << "  </reference>" << endl;
+	}
+	if (found) {
+		output_stream << " </references>" << endl;
+	}
+	pop_contexts_until(xml_context::BACK, output_stream);
+}
+
+void rst2rfcxml::output_back(ostream& output_stream)
+{
+	output_stream << " <back>" << endl;
+	_contexts.push(xml_context::BACK);
+	output_references(output_stream, "normative", "Normative References");
+	output_references(output_stream, "informative", "Informative References");
+}
+
 // Process multiple input files that contribute to an output file.
 void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {
@@ -601,6 +701,8 @@ void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_s
 		ifstream input_file(input_filename);
 		process_input_stream(input_file, output_stream);
 	}
+	pop_contexts(1, output_stream);
+	output_back(output_stream);
 	pop_contexts(0, output_stream);
 }
 
