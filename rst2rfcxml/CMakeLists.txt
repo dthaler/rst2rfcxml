@@ -8,6 +8,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
 endif()
 
 include_directories(../external/fmt/include)
+include_directories(../external)
 
 # Add source to this project's executable.
 add_executable (rst2rfcxml "rst2rfcxml.cpp" "rst2rfcxml.h")
