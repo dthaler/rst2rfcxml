@@ -226,8 +226,12 @@ string rst2rfcxml::replace_links(string line)
 			if (fragment_start != string::npos) {
 				filename = middle.substr(title_end + 4, fragment_start - title_end - 4);
 				fragment = middle.substr(fragment_start + 1, link_end - fragment_start - 1);
-				reference& reference = _rst_references[filename];
-				reference.use_count++;
+				reference* reference = get_reference_by_target(filename);
+				if (reference == nullptr) {
+					// Reference not found.
+					return line;
+				}
+				reference->use_count++;
 #if 0
 				// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
 				// if relative is present, but xml2rfc gives an error.
@@ -237,13 +241,17 @@ string rst2rfcxml::replace_links(string line)
 					return format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
 				}
 #else
-				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference.anchor, title, after);
+				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
 #endif
 			} else {
 				filename = middle.substr(title_end + 4, link_end - title_end - 4);
-				reference& reference = _rst_references[filename];
-				reference.use_count++;
-				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference.anchor, title, after);
+				reference* reference = get_reference_by_target(filename);
+				if (reference == nullptr) {
+					// Reference not found.
+					return line;
+				}
+				reference->use_count++;
+				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
 			}
 		}
 
@@ -297,10 +305,32 @@ static bool _handle_variable_initialization(string line, string label, string& f
 	return false;
 }
 
+reference& rst2rfcxml::get_reference_by_anchor(string anchor)
+{
+	if (_xml_references.contains(anchor)) {
+		return _xml_references[anchor];
+	}
+
+	// Create a reference.
+	reference reference;
+	reference.anchor = anchor;
+	_xml_references[anchor] = reference;
+	return _xml_references[anchor];
+}
+
+reference* rst2rfcxml::get_reference_by_target(string target)
+{
+	if (_rst_references.contains(target)) {
+		return &_xml_references[_rst_references[target]];
+	}
+	return nullptr;
+}
+
 // Handle variable initializations. Returns true if input has been handled.
 bool rst2rfcxml::handle_variable_initializations(string line)
 {
-	if (_handle_variable_initialization(line, "category", _category) ||
+	if (_handle_variable_initialization(line, "baseTargetUri", _base_target_uri) ||
+		_handle_variable_initialization(line, "category", _category) ||
 		_handle_variable_initialization(line, "docName", _document_name) ||
 		_handle_variable_initialization(line, "ipr", _ipr) ||
 		_handle_variable_initialization(line, "submissionType", _submission_type) ||
@@ -337,27 +367,19 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 
 	// Handle reference initializations.
 	cmatch match;
-	if (regex_match(line.c_str(), match, regex(".. \\|([^\\|]*)\\| replace:: \\[([\\w-]+)\\]"))) {
-		// Create a reference.
-		reference reference;
-		reference.anchor = match[2];
-		reference.rst_target = match[1];
-		_rst_references[reference.rst_target] = reference;
-		_xml_references[reference.anchor] = reference.rst_target;
-		return true;
-	}
 	if (regex_search(line.c_str(), match, regex("^.. \\|\\[([\\w-]+)\\]title\\| replace:: "))) {
-		reference& reference = _rst_references[_xml_references[match[1]]];
+		reference& reference = get_reference_by_anchor(match[1]);
 		reference.title = match.suffix().str();
 		return true;
 	}
 	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]target\\| replace:: "))) {
-		reference& reference = _rst_references[_xml_references[match[1]]];
-		reference.xml_target = match.suffix().str();
+		reference& reference = get_reference_by_anchor(match[1]);
+		reference.target = match.suffix().str();
+		_rst_references[reference.target] = match[1];
 		return true;
 	}
 	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]type\\| replace:: "))) {
-		reference& reference = _rst_references[_xml_references[match[1]]];
+		reference& reference = get_reference_by_anchor(match[1]);
 		reference.type = match.suffix().str();
 		return true;
 	}
@@ -665,7 +687,7 @@ void rst2rfcxml::output_references(ostream& output_stream, string type, string t
 {
 	bool found = false;
 
-	for (auto& [_, reference] : _rst_references) {
+	for (auto& [_, reference] : _xml_references) {
 		if (reference.use_count == 0 || reference.type != type) {
 			continue;
 		}
@@ -673,7 +695,17 @@ void rst2rfcxml::output_references(ostream& output_stream, string type, string t
 			output_stream << format(" <references><name>{}</name>", title) << endl;
 			found = true;
 		}
-		output_stream << format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, reference.xml_target) << endl;
+
+		// Compose target URI.
+		string target_uri;
+		if ((reference.target.find("://") == string::npos) && !_base_target_uri.empty()) {
+			// TODO: use a library that correctly computes a URI given a base and a relative reference.
+			target_uri = _base_target_uri + "/" + reference.target;
+		} else {
+			target_uri = reference.target;
+		}
+
+		output_stream << format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, target_uri) << endl;
 		output_stream << "   <front>" << endl;
 		output_stream << "    <title>" << reference.title << "</title>" << endl;
 		output_stream << "    <author></author>" << endl;

@@ -37,8 +37,7 @@ struct author {
 struct reference {
     std::string anchor;
     std::string title;
-    std::string rst_target;
-    std::string xml_target;
+    std::string target;
     std::string type;
     int use_count;
 };
@@ -48,6 +47,8 @@ public:
     void process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
 
 private:
+    reference& get_reference_by_anchor(std::string anchor);
+    reference* get_reference_by_target(std::string target);
     void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
     void process_line(std::string current, std::string next, std::ostream& output_stream);
     void output_line(std::string line, std::ostream& output_stream);
@@ -67,6 +68,7 @@ private:
     std::string handle_escapes_and_links(std::string line);
 
     std::string _document_name;
+    std::string _base_target_uri;
     std::string _ipr;
     std::string _category;
     std::vector<size_t> _column_indices;
@@ -81,6 +83,6 @@ private:
     // we know whether the next one affects it.
     std::string _previous_line;
     
-    std::map<std::string, reference> _rst_references;
-    std::map<std::string, std::string> _xml_references;
+    std::map<std::string, std::string> _rst_references;
+    std::map<std::string, reference> _xml_references;
 };
