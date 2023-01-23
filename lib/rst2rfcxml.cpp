@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Dave Thaler
 // SPDX-License-Identifier: MIT
 
-#include <fmt/core.h>
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 #include <fstream>
 #include <regex>
 #include <sstream>

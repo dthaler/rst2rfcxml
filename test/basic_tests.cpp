@@ -175,8 +175,10 @@ constexpr const char* BASIC_PREAMBLE = R"(<?xml version="1.0" encoding="UTF-8"?>
 TEST_CASE("empty header", "[basic]")
 {
     string expected_output = BASIC_PREAMBLE;
-    expected_output += R"(<rfc ipr="" docName="" category="" submissionType="">
+    expected_output += R"(
+<rfc ipr="" docName="" category="" submissionType="">
 
+ <front>
  </front>
 </rfc>
 )";

@@ -34,7 +34,8 @@ jobs:
           cmake --build build -j $(nproc)
 
       - name: Run unit tests
-        run: ./test -d yes
+        working-directory: ./build/test
+        run: ./tests -d yes
 
   build_windows:
     strategy:
@@ -58,4 +59,4 @@ jobs:
           cmake --build build -j $(nproc) --config ${{env.BUILD_CONFIGURATION}}
 
       - name: Run unit tests
-        run: ./${{env.BUILD_CONFIGURATION}}/test -d yes
+        run: ./build/test/${{env.BUILD_CONFIGURATION}}/tests.exe -d yes

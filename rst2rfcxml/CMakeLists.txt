@@ -13,11 +13,9 @@ include_directories(../lib)
 
 # Add source to this project's executable.
 add_executable (rst2rfcxml "main.cpp" "../lib/rst2rfcxml.h")
-target_link_libraries(rst2rfcxml PRIVATE fmt)
+target_link_libraries(rst2rfcxml PRIVATE fmt::fmt-header-only)
 target_link_libraries(rst2rfcxml PRIVATE lib)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET rst2rfcxml PROPERTY CXX_STANDARD 20)
 endif()
-
-# TODO: Add tests and install targets if needed.
