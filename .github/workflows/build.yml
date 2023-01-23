@@ -33,6 +33,10 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_CONFIGURATION}}
           cmake --build build -j $(nproc)
 
+      - name: Run unit tests
+        working-directory: ./build/test
+        run: ./tests -d yes
+
   build_windows:
     strategy:
       matrix:
@@ -53,3 +57,6 @@ jobs:
           mkdir build
           cmake -B build
           cmake --build build -j $(nproc) --config ${{env.BUILD_CONFIGURATION}}
+
+      - name: Run unit tests
+        run: ./build/test/${{env.BUILD_CONFIGURATION}}/tests.exe -d yes

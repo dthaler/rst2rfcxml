@@ -1,9 +1,10 @@
-﻿// rst2rfcxml.h : Include file for standard system include files,
-// or project specific include files.
-
+﻿// Copyright (c) Dave Thaler
+// SPDX-License-Identifier: MIT
 #pragma once
 
 #include <iostream>
+#include <map>
+
 #include <stack>
 
 enum class xml_context {
@@ -45,20 +46,20 @@ struct reference {
 class rst2rfcxml {
 public:
     void process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
+    void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
+    void pop_contexts(int level, std::ostream& output_stream);
 
 private:
     reference& get_reference_by_anchor(std::string anchor);
     reference* get_reference_by_target(std::string target);
-    void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
-    void process_line(std::string current, std::string next, std::ostream& output_stream);
     void output_line(std::string line, std::ostream& output_stream);
     void output_header(std::ostream& output_stream);
     void output_back(std::ostream& output_stream);
     void output_references(std::ostream& output_stream, std::string type, std::string title);
     void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
-    void pop_contexts(int level, std::ostream& output_stream);
     void pop_contexts_until(xml_context end, std::ostream& output_stream);
+    void process_line(std::string current, std::string next, std::ostream& output_stream);
     bool in_context(xml_context context) const;
     bool handle_variable_initializations(std::string line);
     bool handle_table_line(std::string current, std::string next, std::ostream& output_stream);

@@ -7,4 +7,6 @@ project ("rst2rfcxml")
 
 # Include sub-projects.
 add_subdirectory("external/fmt")
+add_subdirectory("lib")
 add_subdirectory("rst2rfcxml")
+add_subdirectory("test")
