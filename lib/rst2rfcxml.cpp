@@ -85,14 +85,33 @@ static void _output_optional_attribute(ostream& output_stream, string name, stri
 	}
 }
 
+static void _output_optional_text_element(ostream& output_stream, string name, string value)
+{
+	if (!value.empty()) {
+		output_stream << fmt::format("    <{}>{}</{}>", name, value, name) << endl;
+	}
+}
+
 void rst2rfcxml::output_authors(ostream& output_stream) const
 {
-	for (auto author : _authors) {
-		output_stream << fmt::format("{}<author fullname=\"{}\"", _spaces(_contexts.size()), author.fullname);
+	for (auto& [anchor, author] : _authors) {
+		output_stream << fmt::format("  <author fullname=\"{}\"", author.fullname);
 		_output_optional_attribute(output_stream, "initials", author.initials);
 		_output_optional_attribute(output_stream, "surname", author.surname);
 		_output_optional_attribute(output_stream, "role", author.role);
-		output_stream << "></author>" << endl;
+		output_stream << ">" << endl;
+		output_stream << "   <address>" << endl;
+		output_stream << "    <postal>" << endl;
+		_output_optional_text_element(output_stream, "city", author.city);
+		_output_optional_text_element(output_stream, "code", author.code);
+		_output_optional_text_element(output_stream, "country", author.country);
+		_output_optional_text_element(output_stream, "region", author.region);
+		_output_optional_text_element(output_stream, "street", author.street);
+		output_stream << "    </postal>" << endl;
+		_output_optional_text_element(output_stream, "phone", author.phone);
+		_output_optional_text_element(output_stream, "email", author.email);
+		output_stream << "   </address>" << endl;
+		output_stream << "  </author>" << endl;
 	}
 }
 
@@ -307,6 +326,19 @@ static bool _handle_variable_initialization(string line, string label, string& f
 	return false;
 }
 
+author& rst2rfcxml::get_author_by_anchor(string anchor)
+{
+	if (_authors.contains(anchor)) {
+		return _authors[anchor];
+	}
+
+	// Create an author.
+	author author;
+	author.anchor = anchor;
+	_authors[anchor] = author;
+	return _authors[anchor];
+}
+
 reference& rst2rfcxml::get_reference_by_anchor(string anchor)
 {
 	if (_xml_references.contains(anchor)) {
@@ -341,46 +373,77 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 	}
 
 	// Handle author field initializations.
-	string author_fullname_prefix = ".. |authorFullname| replace:: ";
-	if (line.starts_with(author_fullname_prefix)) {
-		author author;
-		author.fullname = _trim(line.substr(author_fullname_prefix.length()));
-		_authors.push_back(author);
+	cmatch match;
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].fullname\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.fullname = match.suffix().str();
 		return true;
 	}
-	string author_role_prefix = ".. |authorRole| replace:: ";
-	if (line.starts_with(author_role_prefix)) {
-		author& author = _authors.back();
-		author.role = _trim(line.substr(author_role_prefix.length()));
+	string author_role_prefix = ".. |author.role| replace:: ";
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].role\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.role = match.suffix().str();
 		return true;
 	}
-	string author_surname_prefix = ".. |authorSurname| replace:: ";
-	if (line.starts_with(author_surname_prefix)) {
-		author& author = _authors.back();
-		author.surname = _trim(line.substr(author_surname_prefix.length()));
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].surname\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.surname = match.suffix().str();
 		return true;
 	}
-	string author_initials_prefix = ".. |authorInitials| replace:: ";
-	if (line.starts_with(author_initials_prefix)) {
-		author& author = _authors.back();
-		author.initials = _trim(line.substr(author_initials_prefix.length()));
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].initials\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.initials = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].email\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.email = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].phone\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.phone = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].city\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.city = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].code\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.code = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].country\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.country = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].region\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.region = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].street\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.street = match.suffix().str();
 		return true;
 	}
 
 	// Handle reference initializations.
-	cmatch match;
-	if (regex_search(line.c_str(), match, regex("^.. \\|\\[([\\w-]+)\\]title\\| replace:: "))) {
+	if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].title\\| replace:: "))) {
 		reference& reference = get_reference_by_anchor(match[1]);
 		reference.title = match.suffix().str();
 		return true;
 	}
-	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]target\\| replace:: "))) {
+	if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].target\\| replace:: "))) {
 		reference& reference = get_reference_by_anchor(match[1]);
 		reference.target = match.suffix().str();
 		_rst_references[reference.target] = match[1];
 		return true;
 	}
-	if (regex_search(line.c_str(), match, regex(".. \\|\\[([\\w-]+)\\]type\\| replace:: "))) {
+	if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].type\\| replace:: "))) {
 		reference& reference = get_reference_by_anchor(match[1]);
 		reference.type = match.suffix().str();
 		return true;
