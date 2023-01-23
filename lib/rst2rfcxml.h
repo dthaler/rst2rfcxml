@@ -29,10 +29,18 @@ enum class xml_context {
 };
 
 struct author {
+    std::string anchor;
     std::string initials;
     std::string surname;
     std::string fullname;
     std::string role;
+    std::string email;
+    std::string phone;
+    std::string city;
+    std::string code;
+    std::string country;
+    std::string region;
+    std::string street;
 };
 
 struct reference {
@@ -50,6 +58,7 @@ public:
     void pop_contexts(int level, std::ostream& output_stream);
 
 private:
+    author& get_author_by_anchor(std::string anchor);
     reference& get_reference_by_anchor(std::string anchor);
     reference* get_reference_by_target(std::string target);
     void output_line(std::string line, std::ostream& output_stream);
@@ -73,17 +82,16 @@ private:
     std::string _ipr;
     std::string _category;
     std::vector<size_t> _column_indices;
-    std::vector<author> _authors;
+    std::map<std::string, author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;
     std::stack<xml_context> _contexts;
+    std::map<std::string, std::string> _rst_references;
+    std::map<std::string, reference> _xml_references;
     bool _source_code_skip_blank_lines;
 
     // Some RST markup modifies the previous line, so we need to
     // keep track of the previous line and process it only after
     // we know whether the next one affects it.
     std::string _previous_line;
-    
-    std::map<std::string, std::string> _rst_references;
-    std::map<std::string, reference> _xml_references;
 };

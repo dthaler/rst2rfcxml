@@ -32,7 +32,7 @@ TEST_CASE("references", "[basic]")
     test_rst2rfcxml("`Foo bar`_", "<t>\n <xref target=\"foo-bar\">Foo bar</xref>\n</t>\n");
 
     test_rst2rfcxml(R"(
-.. |[SAMPLE]target| replace:: https://example.com/target
+.. |ref[SAMPLE].target| replace:: https://example.com/target
     `Sample reference <https://example.com/target>`_
 )", "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
 }
@@ -195,7 +195,19 @@ TEST_CASE("common header", "[basic]")
   <title abbrev="Abbreviated Title">
 My Title
   </title>
-  <author fullname="John Doe" initials="J." surname="Doe" role="editor"></author>
+  <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+   <address>
+    <postal>
+    <city>Anytown</city>
+    <code>12345</code>
+    <country>USA</country>
+    <region>State</region>
+    <street>123 Main St</street>
+    </postal>
+    <phone>555-1212</phone>
+    <email>johndoe@example.com</email>
+   </address>
+  </author>
   <abstract>
    <t>
     My abstract
@@ -210,10 +222,17 @@ My Title
 .. |category| replace:: std
 .. |titleAbbr| replace:: Abbreviated Title
 .. |submissionType| replace:: IETF
-.. |authorFullname| replace:: John Doe
-.. |authorRole| replace:: editor
-.. |authorSurname| replace:: Doe
-.. |authorInitials| replace:: J.
+.. |author[0].fullname| replace:: John Doe
+.. |author[0].role| replace:: editor
+.. |author[0].surname| replace:: Doe
+.. |author[0].initials| replace:: J.
+.. |author[0].email| replace:: johndoe@example.com
+.. |author[0].phone| replace:: 555-1212
+.. |author[0].city| replace:: Anytown
+.. |author[0].code| replace:: 12345
+.. |author[0].country| replace:: USA
+.. |author[0].region| replace:: State
+.. |author[0].street| replace:: 123 Main St
 .. header::
 
 ========

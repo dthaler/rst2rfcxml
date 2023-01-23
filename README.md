@@ -87,21 +87,33 @@ Example:
 #### Author settings
 
 The document must have at least one author, and can have multiple authors.
-To add an author, an "authorFullname" must be set.
 
-* authorFullname: Adds an author with the specified fullname.
-* authorRole: If specified, sets the role of the most recently added author.
-* authorSurname: Sets the surname of the most recently added author.
-* authorInitials: Sets the initials of the most recently added author.
+* author[_anchor_].fullname: Fullname to associate with the author with the indicated _anchor_.
+* author[_anchor_].role: Optional. Role to associate with the author with the indicated _anchor_.
+* author[_anchor_].surname: Surname to associate with the author with the indicated _anchor_.
+* author[_anchor_].initials: Initials to associate with the author with the indicated _anchor_.
+* author[_anchor_].email: Optional. Email address to associate with the author with the indicated _anchor_.
+* author[_anchor_].phone: Optional. Phone number to associate with the author with the indicated _anchor_.
+* author[_anchor_].city: Optional. City to associate with the author with the indicated _anchor_.
+* author[_anchor_].code: Optional. Postal code to associate with the author with the indicated _anchor_.
+* author[_anchor_].country: Optional. Country to associate with the author with the indicated _anchor_.
+* author[_anchor_].region: Optional. State or region to associate with the author with the indicated _anchor_.
+* author[_anchor_].street: Optional. Street address to associate with the author with the indicated _anchor_.
 
 Example:
 
 ```
-.. |authorFullname| replace:: Dave Thaler
-.. |authorRole| replace:: editor
-.. |authorSurname| replace:: Thaler
-.. |authorInitials| replace:: D.
+.. |author[0].fullname| replace:: John Doe
+.. |author[0].role| replace:: editor
+.. |author[0].surname| replace:: Doe
+.. |author[0].initials| replace:: J.
+.. |author[0].email| replace:: johndoe@example.com
+.. |author[0].phone| replace:: 555-1212
+.. |author[0].city| replace:: Anytown
 ```
+
+The _anchor_ values do not appear in the XML but are merely
+used to group fields of the same author.
 
 #### External References
 
@@ -114,15 +126,15 @@ RST files specify external references using the following syntax:
 To specify the Internet-Draft format reference, one must map the URI (not including the fragment)
 portion as follows:
 
-* [anchor]target: Target URI to associate with the reference with the indicated anchor. If the target
+* ref[_anchor_].target: Target URI to associate with the reference with the indicated _anchor_. If the target
   is a relative reference, it is relative to the "baseTargetUri" specified above.
-* [anchor]title: Title to associate with the reference with the indicated anchor.
-* [anchor]type: Must be set to "normative" or "informative".
+* ref[_anchor_].title: Title to associate with the reference with the indicated _anchor_.
+* ref[_anchor_].type: Must be set to "normative" or "informative".
 
 Example:
 
 ```
-.. |[SAMPLE]title| replace:: Sample Title
-.. |[SAMPLE]target| replace:: https://example.com/target
-.. |[SAMPLE]type| replace:: normative
+.. |ref[SAMPLE].title| replace:: Sample Title
+.. |ref[SAMPLE].target| replace:: https://example.com/target
+.. |ref[SAMPLE].type| replace:: normative
 ```
