@@ -37,6 +37,20 @@ jobs:
         working-directory: ./build/test
         run: ./tests -d yes
 
+      - name: Upload rst2rfcxml binary
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: Ubuntu rst2rfcxml
+          path: ${{github.workspace}}/build/rst2rfcxml/rst2rfcxml
+          retention-days: 5
+
+      - name: Upload Build Output
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: Ubuntu ${{matrix.configurations}} build
+          path: ${{github.workspace}}/build
+          retention-days: 5
+
   build_windows:
     strategy:
       matrix:
@@ -60,3 +74,17 @@ jobs:
 
       - name: Run unit tests
         run: ./build/test/${{env.BUILD_CONFIGURATION}}/tests.exe -d yes
+
+      - name: Upload rst2rfcxml binary
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: Windows ${{matrix.configurations}} rst2rfcxml.exe
+          path: ${{github.workspace}}/build/rst2rfcxml/${{env.BUILD_CONFIGURATION}}/rst2rfcxml.exe
+          retention-days: 5
+
+      - name: Upload Build Output
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: Windows ${{matrix.configurations}} build
+          path: ${{github.workspace}}/build
+          retention-days: 5
