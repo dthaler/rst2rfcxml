@@ -39,6 +39,16 @@ Multiple input files are read as if they were one large file.
 This allows (for example) a "prologue" file to contain xml2rfc specific definitions,
 to be included before the main rst file.
 
+## Header directive
+
+To generate an rfc2xml header, the header directive must be included.
+
+```
+.. header::
+```
+
+This directive must appear after any xml2rfc specific definitions discussed below.
+
 ## xml2rfc specific definitions
 
 The "replace" directive is used to configure xml2rfc specific definitions.

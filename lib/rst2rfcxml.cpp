@@ -738,22 +738,3 @@ void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_s
 	output_back(output_stream);
 	pop_contexts(0, output_stream);
 }
-
-int main(int argc, char** argv)
-{
-	CLI::App app{ "A reStructured Text to xmlrfc Version 3 converter" };
-	string output_filename;
-	app.add_option("-o", output_filename, "Output filename");
-	vector<string> input_filenames;
-	app.add_option("-i,input", input_filenames, "Input filenames")->mandatory(true);
-	CLI11_PARSE(app, argc, argv);
-
-	rst2rfcxml rst2rfcxml;
-	if (output_filename.empty()) {
-		rst2rfcxml.process_files(input_filenames, cout);
-	} else {
-		ofstream outfile(output_filename);
-		rst2rfcxml.process_files(input_filenames, outfile);
-	}
-	return 0;
-}
