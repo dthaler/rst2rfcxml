@@ -2,6 +2,11 @@
 # project specific logic here.
 #
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+    "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set(CMAKE_CXX_STANDARD 20)
+endif()
+
 # Add source to this project's executable.
 add_executable (rst2rfcxml "rst2rfcxml.cpp" "rst2rfcxml.h")
 

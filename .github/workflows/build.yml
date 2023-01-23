@@ -29,7 +29,8 @@ jobs:
         run: |
           mkdir build
           cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_CONFIGURATION}}
-          cmake --build build -j $(nproc)
+          # Temporarily disabled until we convert from format to fmt for now.
+          # cmake --build build -j $(nproc)
 
   build_windows:
     strategy:
