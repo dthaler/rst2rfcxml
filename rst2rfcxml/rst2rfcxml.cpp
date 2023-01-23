@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Dave Thaler
 // SPDX-License-Identifier: MIT
 
-#include <format>
+#include <fmt/core.h>
 #include <fstream>
 #include <regex>
 #include <sstream>
 #include <string>
-#include "../external/CLI11.HPP"
+#include "CLI11.hpp"
 #include "rst2rfcxml.h"
 
 using namespace std;
@@ -71,7 +71,7 @@ void rst2rfcxml::output_header(ostream& output_stream)
 
 )";
 
-	output_stream << format("<rfc ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\">", _ipr, _document_name, _category, _submission_type) << endl << endl;
+	output_stream << fmt::format("<rfc ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\">", _ipr, _document_name, _category, _submission_type) << endl << endl;
 	_contexts.push(xml_context::RFC);
 	output_stream << " <front>" << endl;
 	_contexts.push(xml_context::FRONT);
@@ -80,14 +80,14 @@ void rst2rfcxml::output_header(ostream& output_stream)
 static void _output_optional_attribute(ostream& output_stream, string name, string value)
 {
 	if (!value.empty()) {
-		output_stream << format(" {}=\"{}\"", name, value);
+		output_stream << fmt::format(" {}=\"{}\"", name, value);
 	}
 }
 
 void rst2rfcxml::output_authors(ostream& output_stream) const
 {
 	for (auto author : _authors) {
-		output_stream << format("{}<author fullname=\"{}\"", _spaces(_contexts.size()), author.fullname);
+		output_stream << fmt::format("{}<author fullname=\"{}\"", _spaces(_contexts.size()), author.fullname);
 		_output_optional_attribute(output_stream, "initials", author.initials);
 		_output_optional_attribute(output_stream, "surname", author.surname);
 		_output_optional_attribute(output_stream, "role", author.role);
@@ -186,7 +186,7 @@ string _replace_constant_width_instances(string line)
 		string before = line.substr(0, index);
 		string middle = line.substr(index + 2, next_index - index - 2);
 		string after = line.substr(next_index + 2);
-		line = format("{}<tt>{}</tt>{}", before, _trim(middle), after);
+		line = fmt::format("{}<tt>{}</tt>{}", before, _trim(middle), after);
 	}
 	return line;
 }
@@ -237,12 +237,12 @@ string rst2rfcxml::replace_links(string line)
 				// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
 				// if relative is present, but xml2rfc gives an error.
 				if (reference.xml_target.empty()) {
-					return format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
+					return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
 				} else {
-					return format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
+					return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
 				}
 #else
-				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
+				return fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
 #endif
 			} else {
 				filename = middle.substr(title_end + 4, link_end - title_end - 4);
@@ -252,11 +252,11 @@ string rst2rfcxml::replace_links(string line)
 					return line;
 				}
 				reference->use_count++;
-				return format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
+				return fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
 			}
 		}
 
-		line = format("{}<xref target=\"{}\">{}</xref>{}", before, _anchor(middle), middle, after);
+		line = fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, _anchor(middle), middle, after);
 	}
 	return line;
 }
@@ -298,7 +298,7 @@ constexpr int BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
 
 static bool _handle_variable_initialization(string line, string label, string& field)
 {
-	string prefix = format(".. |{}| replace:: ", _trim(label));
+	string prefix = fmt::format(".. |{}| replace:: ", _trim(label));
 	if (line.starts_with(prefix)) {
 		field = _handle_escapes(line.substr(prefix.length()));
 		return true;
@@ -436,7 +436,7 @@ bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			if (current.length() > start) {
 				string value = handle_escapes_and_links(current.substr(start, count));
-				output_stream << format("{}<th>{}</th>", _spaces(_contexts.size()), value) << endl;
+				output_stream << fmt::format("{}<th>{}</th>", _spaces(_contexts.size()), value) << endl;
 			}
 		}
 		return true;
@@ -452,7 +452,7 @@ bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_
 			if (current.length() >= start) {
 				value = handle_escapes_and_links(current.substr(start, count));
 			}
-			output_stream << format("{} <td>{}</td>", _spaces(_contexts.size()), value) << endl;
+			output_stream << fmt::format("{} <td>{}</td>", _spaces(_contexts.size()), value) << endl;
 		}
 		output_stream << _spaces(_contexts.size()) << "</tr>" << endl;
 		return true;
@@ -474,7 +474,7 @@ bool rst2rfcxml::handle_section_title(int level, string marker, string current, 
 			_contexts.push(xml_context::MIDDLE);
 		}
 		string title = handle_escapes_and_links(current);
-		output_stream << format("{}<section anchor=\"{}\" title=\"{}\">", _spaces(_contexts.size()), _anchor(title), title) << endl;
+		output_stream << fmt::format("{}<section anchor=\"{}\" title=\"{}\">", _spaces(_contexts.size()), _anchor(title), title) << endl;
 		_contexts.push(xml_context::SECTION);
 		return true;
 	}
@@ -496,7 +496,7 @@ bool rst2rfcxml::handle_title_line(string current, string next, ostream& output_
 
 		// If in front matter, this is the start of the title.
 		if (in_context(xml_context::FRONT)) {
-			output_stream << format("  <title abbrev=\"{}\">", _abbreviated_title) << endl;
+			output_stream << fmt::format("  <title abbrev=\"{}\">", _abbreviated_title) << endl;
 			_contexts.push(xml_context::TITLE);
 			return true;
 		}
@@ -628,9 +628,9 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 			output_stream << _spaces(_contexts.size()) << "<ul>" << endl;
 			_contexts.push(xml_context::UNORDERED_LIST);
 		}
-		output_stream << format("{}<li>", _spaces(_contexts.size())) << endl;
+		output_stream << fmt::format("{}<li>", _spaces(_contexts.size())) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
-		output_stream << format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2))) << endl;
+		output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2))) << endl;
 	} else if (line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && line.starts_with("  ")) {
 			pop_context(output_stream);
@@ -693,7 +693,7 @@ void rst2rfcxml::output_references(ostream& output_stream, string type, string t
 			continue;
 		}
 		if (!found) {
-			output_stream << format(" <references><name>{}</name>", title) << endl;
+			output_stream << fmt::format(" <references><name>{}</name>", title) << endl;
 			found = true;
 		}
 
@@ -706,7 +706,7 @@ void rst2rfcxml::output_references(ostream& output_stream, string type, string t
 			target_uri = reference.target;
 		}
 
-		output_stream << format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, target_uri) << endl;
+		output_stream << fmt::format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, target_uri) << endl;
 		output_stream << "   <front>" << endl;
 		output_stream << "    <title>" << reference.title << "</title>" << endl;
 		output_stream << "    <author></author>" << endl;

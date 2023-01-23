@@ -6,4 +6,5 @@ cmake_minimum_required (VERSION 3.8)
 project ("rst2rfcxml")
 
 # Include sub-projects.
-add_subdirectory ("rst2rfcxml")
+add_subdirectory("external/fmt")
+add_subdirectory("rst2rfcxml")
