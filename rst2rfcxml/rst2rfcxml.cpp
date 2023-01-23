@@ -6,7 +6,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
-#include "CLI11.HPP"
+#include "CLI11.hpp"
 #include "rst2rfcxml.h"
 
 using namespace std;
