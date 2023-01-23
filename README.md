@@ -4,7 +4,7 @@ Convert reStructured Text to rfc2xml Version 3
 ## Installation
 Clone:
 ```
-git clone https://github.com/dthaler/rst2rfcxml.git
+git clone --recurse-submodules https://github.com/dthaler/rst2rfcxml.git
 cd rst2rfcxml
 ```
 

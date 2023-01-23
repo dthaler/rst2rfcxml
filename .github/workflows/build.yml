@@ -24,13 +24,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
 
       - name: Build
         run: |
           mkdir build
           cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_CONFIGURATION}}
-          # Temporarily disabled until we convert from format to fmt for now.
-          # cmake --build build -j $(nproc)
+          cmake --build build -j $(nproc)
 
   build_windows:
     strategy:
@@ -44,6 +45,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
 
       - name: Build
         run: |
