@@ -1,6 +1,25 @@
 # rst2rfcxml
 Convert reStructured Text to rfc2xml Version 3
 
+## Installation
+Clone:
+```
+git clone https://github.com/dthaler/rst2rfcxml.git
+cd rst2rfcxml
+```
+
+Make on Linux:
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+Make on Windows (which uses a multi-configuration generator):
+```
+cmake -B build
+cmake --build build --config Release
+```
+
 ## Usage
 
 ```
