@@ -47,7 +47,7 @@ of RST files.
 
 To generate an rfc2xml header, the `header` directive must be included.
 
-```
+```rst
 .. header::
 ```
 
@@ -58,7 +58,7 @@ This directive must appear after any xml2rfc specific definitions discussed belo
 The `replace` directive is used to configure xml2rfc specific definitions.
 The general syntax is:
 
-```
+```rst
 .. |name| replace:: value
 ```
 
@@ -75,7 +75,7 @@ where `name` is a string defined below, and `value` is the value to set it to.
 
 Example:
 
-```
+```rst
 .. |docName| replace:: draft-thaler-sample-00
 .. |ipr| replace:: trust200902
 .. |category| replace:: std
@@ -102,7 +102,7 @@ The document must have at least one author, and can have multiple authors.
 
 Example:
 
-```
+```rst
 .. |author[0].fullname| replace:: John Doe
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
@@ -119,7 +119,7 @@ used to group fields of the same author.
 
 RST files specify external references using the following syntax:
 
-```
+```rst
 `Some Title <https://example.com/path#optional-fragment-id>`_
 ```
 
@@ -133,7 +133,7 @@ portion as follows:
 
 Example:
 
-```
+```rst
 .. |ref[SAMPLE].title| replace:: Sample Title
 .. |ref[SAMPLE].target| replace:: https://example.com/target
 .. |ref[SAMPLE].type| replace:: normative
