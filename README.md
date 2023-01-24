@@ -85,10 +85,10 @@ The `replace` directive is used to configure xml2rfc specific definitions.
 The general syntax is:
 
 ```rst
-.. |name| replace:: value
+.. |<name>| replace:: <value>
 ```
 
-where `name` is a string defined below, and `value` is the value to set it to.
+where `<name>` is a string defined below, and `<value>` is the value to set it to.
 
 #### Common settings
 
