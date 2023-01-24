@@ -10,10 +10,23 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths_ignore: '["**.md"]'
+
   build_ubuntu:
     strategy:
       matrix:
         configurations: [Debug, Release]
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     env:
       # Configuration type to build.  For documentation on how build matrices work, see
@@ -53,6 +66,8 @@ jobs:
     strategy:
       matrix:
         configurations: [Debug, Release]
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: windows-latest
     env:
       # Configuration type to build.  For documentation on how build matrices work, see
