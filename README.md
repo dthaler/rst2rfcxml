@@ -1,6 +1,6 @@
 # rst2rfcxml
-Convert [reStructured Text](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html)
-to [rfc2xml Version 3](https://www.rfc-editor.org/rfc/rfc7991).
+Convert [reStructured Text (RST)](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html)
+to [xml2rfc Version 3](https://www.rfc-editor.org/rfc/rfc7991).
 
 ## Installation
 Clone:
@@ -24,7 +24,7 @@ cmake --build build --config Release
 ## Usage
 
 ```
-A reStructured Text to xmlrfc Version 3 converter
+A reStructured Text to xml2rfc Version 3 converter
 Usage: rst2rfcxml.exe [OPTIONS] input...
 
 Positionals:
@@ -40,12 +40,20 @@ Multiple input files are read as if they were one large file.
 This allows (for example) a "prologue" file to contain xml2rfc specific definitions,
 to be included before the main RST file.
 
+For example, conversion from RST files to an Internet-Draft might be done as follows:
+
+```
+$ ./build/rst2rfcxml/rst2rfcxml sample-prologue.rst sample.rst -o draft-thaler-sample-00.xml
+$ xml2rfc --html draft-thaler-sample-00.xml
+$ firefox draft-thaler-sample-00.html
+```
+
 The following subsections provide more details on the contents
 of RST files.
 
 ### Header directive
 
-To generate an rfc2xml header, the `header` directive must be included.
+To generate an xml2rfc header, the `header` directive must be included.
 
 ```rst
 .. header::

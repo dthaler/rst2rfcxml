@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	CLI::App app{ "A reStructured Text to xmlrfc Version 3 converter" };
+	CLI::App app{ "A reStructured Text to rfc2xml Version 3 converter" };
 	string output_filename;
 	app.add_option("-o", output_filename, "Output filename");
 	vector<string> input_filenames;
