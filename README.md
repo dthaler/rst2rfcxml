@@ -38,7 +38,7 @@ Positionals:
 
 Multiple input files are read as if they were one large file.
 This allows (for example) a "prologue" file to contain xml2rfc specific definitions,
-to be included before the main rst file.
+to be included before the main RST file.
 
 The following subsections provide more details on the contents
 of RST files.
