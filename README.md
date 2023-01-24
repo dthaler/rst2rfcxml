@@ -2,7 +2,21 @@
 Convert [reStructured Text (RST)](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html)
 to [xml2rfc Version 3](https://www.rfc-editor.org/rfc/rfc7991).
 
+Note that the project name uses the term "rfcxml" to refer to xml2rfc Version 3, since the alternative
+"rst2xml2rfc" could imply it converts from rst to rfc, via xml, which is not the case.
+
 ## Installation
+
+rst2rfcxml can be installed either in binary form, or by building from source.
+
+### Installing in binary form
+
+Download and unzip the latest "Ubuntu.Release.rst2rfcxml.zip" (for Linux) or
+"Windows.Release.rst2rfcxml.zip" (for Windows) from
+https://github.com/dthaler/rst2rfcxml/releases.
+
+### Building from source
+
 Clone:
 ```
 git clone --recurse-submodules https://github.com/dthaler/rst2rfcxml.git
@@ -15,11 +29,15 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
+The resulting binary will be in `./build/rst2rfcxml/rst2rfcxml`.
+
 Make on Windows (which uses a multi-configuration generator):
 ```
 cmake -B build
 cmake --build build --config Release
 ```
+
+The resulting binary will be in `.\build\rst2rfcxml\Release\rst2rfcxml.exe`.
 
 ## Usage
 
@@ -43,7 +61,7 @@ to be included before the main RST file.
 For example, conversion from RST files to an Internet-Draft might be done as follows:
 
 ```
-$ ./build/rst2rfcxml/rst2rfcxml sample-prologue.rst sample.rst -o draft-thaler-sample-00.xml
+$ rst2rfcxml sample-prologue.rst sample.rst -o draft-thaler-sample-00.xml
 $ xml2rfc --html draft-thaler-sample-00.xml
 $ firefox draft-thaler-sample-00.html
 ```
