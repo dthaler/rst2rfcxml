@@ -194,15 +194,26 @@ void rst2rfcxml::pop_contexts_until(xml_context end, ostream& output_stream)
 	}
 }
 
-// Replace paired occurrences of one markup with another, e.g., ``foo`` with <tt>foo</tt>.
+// Replace paired occurrences of one markup with another, e.g., **foo** with
+// <strong>foo</strong>, while carefully skipped escaped sequences like \*\*.
 string _replace_all_paired(string line, string from, string to)
 {
 	size_t index;
-	while ((index = line.find(from)) != string::npos) {
-		size_t next_index = line.find(from, index + from.length());
+	while (((index = line.find(from)) != string::npos) && (index == 0 || line[index - 1] != '\\')) {
+		// Find the closing sequence, avoiding escaped sequences.
+		size_t next_index = index + from.length();
+		for (;;) {
+			next_index = line.find(from, next_index);
+			if ((next_index == string::npos) || (line[next_index - 1] != '\\')) {
+				break;
+			}
+			next_index++;
+		}
 		if (next_index == string::npos) {
 			break;
 		}
+
+		// Now do the transform.
 		string before = line.substr(0, index);
 		string middle = line.substr(index + from.length(), next_index - index - from.length());
 		string after = line.substr(next_index + from.length());
@@ -287,20 +298,22 @@ static string _handle_escapes(string line)
 	// Trim whitespace.
 	line = _trim(line);
 
-	// Unescape things RST requires to be escaped.
-	line = _replace_all(line, "\\*", "*");
-	line = _replace_all(line, "\\|", "|");
-	if (line.ends_with("::")) {
-		line = line.substr(0, line.length() - 1);
-	}
-
 	// Escape things XML requires to be escaped.
 	line = _replace_all(line, "&", "&amp;");
 	line = _replace_all(line, "<", "&lt;");
 	line = _replace_all(line, ">", "&gt;");
 
+	// Replace paired items, which must be done after escaping <>.
 	line = _replace_all_paired(line, "``", "tt");
 	line = _replace_all_paired(line, "**", "strong");
+	line = _replace_all_paired(line, "*", "em");
+
+	// Unescape additional things RST requires to be escaped.
+	line = _replace_all(line, "\\*", "*");
+	line = _replace_all(line, "\\|", "|");
+	if (line.ends_with("::")) {
+		line = line.substr(0, line.length() - 1);
+	}
 
 	return line;
 }

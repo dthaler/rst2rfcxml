@@ -19,13 +19,18 @@ void test_rst2rfcxml(const char* input, const char* expected_output)
 TEST_CASE("escapes", "[basic]")
 {
     test_rst2rfcxml("\\*", "<t>\n *\n</t>\n");
+    test_rst2rfcxml("\\*foo\\*", "<t>\n *foo*\n</t>\n");
+    test_rst2rfcxml("*foo*", "<t>\n <em>foo</em>\n</t>\n");
+    test_rst2rfcxml("*foo\\*bar*", "<t>\n <em>foo*bar</em>\n</t>\n");
     test_rst2rfcxml("\\|", "<t>\n |\n</t>\n");
     test_rst2rfcxml("&", "<t>\n &amp;\n</t>\n");
     test_rst2rfcxml("<", "<t>\n &lt;\n</t>\n");
     test_rst2rfcxml(">", "<t>\n &gt;\n</t>\n");
     test_rst2rfcxml("::", "<t>\n :\n</t>\n");
     test_rst2rfcxml("``foo``", "<t>\n <tt>foo</tt>\n</t>\n");
+    test_rst2rfcxml("\\*\\*foo\\*\\*", "<t>\n **foo**\n</t>\n");
     test_rst2rfcxml("**foo**", "<t>\n <strong>foo</strong>\n</t>\n");
+    test_rst2rfcxml("**foo\\*\\*bar**", "<t>\n <strong>foo**bar</strong>\n</t>\n");
 }
 
 TEST_CASE("references", "[basic]")
@@ -128,6 +133,36 @@ baz
  </dd>
  <dt>
   <strong>bar</strong>
+ </dt>
+ <dd>
+  description
+ </dd>
+</dl>
+<t>
+ baz
+</t>
+)");
+}
+
+TEST_CASE("italic definition list", "[basic]")
+{
+    test_rst2rfcxml(R"(
+*foo*
+  description
+
+*bar*
+  description
+
+baz
+)", R"(<dl>
+ <dt>
+  <em>foo</em>
+ </dt>
+ <dd>
+  description
+ </dd>
+ <dt>
+  <em>bar</em>
  </dt>
  <dd>
   description
