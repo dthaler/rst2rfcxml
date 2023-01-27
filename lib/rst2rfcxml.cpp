@@ -194,19 +194,19 @@ void rst2rfcxml::pop_contexts_until(xml_context end, ostream& output_stream)
 	}
 }
 
-// Replace occurrences of ``foo`` with <tt>foo</tt>.
-string _replace_constant_width_instances(string line)
+// Replace paired occurrences of one markup with another, e.g., ``foo`` with <tt>foo</tt>.
+string _replace_all_paired(string line, string from, string to)
 {
 	size_t index;
-	while ((index = line.find("``")) != string::npos) {
-		size_t next_index = line.find("``", index + 2);
+	while ((index = line.find(from)) != string::npos) {
+		size_t next_index = line.find(from, index + from.length());
 		if (next_index == string::npos) {
 			break;
 		}
 		string before = line.substr(0, index);
-		string middle = line.substr(index + 2, next_index - index - 2);
-		string after = line.substr(next_index + 2);
-		line = fmt::format("{}<tt>{}</tt>{}", before, _trim(middle), after);
+		string middle = line.substr(index + from.length(), next_index - index - from.length());
+		string after = line.substr(next_index + from.length());
+		line = fmt::format("{}<{}>{}</{}>{}", before, to, _trim(middle), to, after);
 	}
 	return line;
 }
@@ -299,7 +299,8 @@ static string _handle_escapes(string line)
 	line = _replace_all(line, "<", "&lt;");
 	line = _replace_all(line, ">", "&gt;");
 
-	line = _replace_constant_width_instances(line);
+	line = _replace_all_paired(line, "``", "tt");
+	line = _replace_all_paired(line, "**", "strong");
 
 	return line;
 }
@@ -655,7 +656,7 @@ void rst2rfcxml::process_line(string current, string next, ostream& output_strea
 
 	// Handle definition lists.
 	if (next.starts_with("  ") && (next.find_first_not_of(" ") != string::npos) &&
-		!current.empty() && isalpha(current[0])) {
+		!current.empty() && !isspace(current[0])) {
 		if (!in_context(xml_context::DEFINITION_LIST)) {
 			output_stream << _spaces(_contexts.size()) << "<dl>" << endl;
 			_contexts.push(xml_context::DEFINITION_LIST);

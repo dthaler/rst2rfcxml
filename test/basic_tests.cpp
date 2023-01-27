@@ -25,6 +25,7 @@ TEST_CASE("escapes", "[basic]")
     test_rst2rfcxml(">", "<t>\n &gt;\n</t>\n");
     test_rst2rfcxml("::", "<t>\n :\n</t>\n");
     test_rst2rfcxml("``foo``", "<t>\n <tt>foo</tt>\n</t>\n");
+    test_rst2rfcxml("**foo**", "<t>\n <strong>foo</strong>\n</t>\n");
 }
 
 TEST_CASE("references", "[basic]")
@@ -97,6 +98,36 @@ baz
  </dd>
  <dt>
   bar
+ </dt>
+ <dd>
+  description
+ </dd>
+</dl>
+<t>
+ baz
+</t>
+)");
+}
+
+TEST_CASE("bold definition list", "[basic]")
+{
+    test_rst2rfcxml(R"(
+**foo**
+  description
+
+**bar**
+  description
+
+baz
+)", R"(<dl>
+ <dt>
+  <strong>foo</strong>
+ </dt>
+ <dd>
+  description
+ </dd>
+ <dt>
+  <strong>bar</strong>
  </dt>
  <dd>
   description
