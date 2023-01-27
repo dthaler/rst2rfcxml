@@ -161,6 +161,6 @@ Example:
 
 ```rst
 .. |ref[SAMPLE].title| replace:: Sample Title
-.. |ref[SAMPLE].target| replace:: https://example.com/target
+.. |ref[SAMPLE].target| replace:: https://example.com/path
 .. |ref[SAMPLE].type| replace:: normative
 ```
