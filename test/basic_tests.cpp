@@ -313,19 +313,15 @@ My abstract
 
 TEST_CASE("sample", "[basic]")
 {
-    std::cout << "Current directory: " << filesystem::current_path().string() << endl;
-
     // Find path to sample.rst.
     constexpr int MAX_DEPTH = 4;
     filesystem::path path = ".";
     int depth;
     for (depth = 0; (depth <= MAX_DEPTH) && !filesystem::exists(path.string() + "/sample/sample.rst"); depth++) {
-        std::cout << "Didn't find " << path.string() << "/sample/sample.rst" << endl;
         path /= "..";
     }
     REQUIRE(depth <= MAX_DEPTH);
     path += "/sample/";
-    std::cout << "Found " << path.string() << "sample.rst" << endl;
 
     // Process sample input files.
     vector<string> input_filenames = { path.string() + "sample-prologue.rst", path.string() + "sample.rst"};

@@ -105,7 +105,7 @@ Table of Contents
 
    Internal reference: References (Section 3)
 
-
+   External reference: External reference text [SAMPLE].
 
 
 
@@ -113,9 +113,6 @@ Doe                       Expires 1 August 2023                 [Page 2]
 
 Internet-Draft          Sample Abbreviated Title            January 2023
 
-
-   External reference: `External reference text <https://exaple.com/
-   path>`_.
 
 4.  Blocks
 
@@ -159,6 +156,9 @@ Author's Address
    United States of America
    Phone: 555-1212
    Email: johndoe@example.com
+
+
+
 
 
 

@@ -99,7 +99,7 @@ Sample Document Title
     Internal reference: <xref target="references">References</xref>
    </t>
    <t>
-    External reference: `External reference text &lt;https://exaple.com/path&gt;`_.
+    External reference: <xref target="SAMPLE">External reference text</xref>.
    </t>
   </section>
   <section anchor="blocks" title="Blocks">
