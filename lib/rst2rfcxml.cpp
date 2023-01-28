@@ -95,11 +95,16 @@ static void _output_optional_text_element(ostream& output_stream, string name, s
 void rst2rfcxml::output_authors(ostream& output_stream) const
 {
 	for (auto& [anchor, author] : _authors) {
-		output_stream << fmt::format("  <author fullname=\"{}\"", author.fullname);
+		output_stream << fmt::format("  <author");
 		_output_optional_attribute(output_stream, "initials", author.initials);
+		_output_optional_attribute(output_stream, "asciiInitials", author.asciiInitials);
 		_output_optional_attribute(output_stream, "surname", author.surname);
+		_output_optional_attribute(output_stream, "asciiSurname", author.asciiSurname);
+		_output_optional_attribute(output_stream, "fullname", author.fullname);
 		_output_optional_attribute(output_stream, "role", author.role);
+		_output_optional_attribute(output_stream, "asciiFullname", author.asciiFullname);
 		output_stream << ">" << endl;
+		_output_optional_text_element(output_stream, "organization", author.organization);
 		output_stream << "   <address>" << endl;
 		output_stream << "    <postal>" << endl;
 		_output_optional_text_element(output_stream, "city", author.city);
@@ -107,6 +112,9 @@ void rst2rfcxml::output_authors(ostream& output_stream) const
 		_output_optional_text_element(output_stream, "country", author.country);
 		_output_optional_text_element(output_stream, "region", author.region);
 		_output_optional_text_element(output_stream, "street", author.street);
+		for (auto postalLine : author.postalLine) {
+			_output_optional_text_element(output_stream, "postalLine", postalLine);
+		}
 		output_stream << "    </postal>" << endl;
 		_output_optional_text_element(output_stream, "phone", author.phone);
 		_output_optional_text_element(output_stream, "email", author.email);
@@ -360,7 +368,7 @@ reference& rst2rfcxml::get_reference_by_anchor(string anchor)
 	}
 
 	// Create a reference.
-	reference reference;
+	reference reference = {};
 	reference.anchor = anchor;
 	_xml_references[anchor] = reference;
 	return _xml_references[anchor];
@@ -393,6 +401,11 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 		author.fullname = match.suffix().str();
 		return true;
 	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].asciiFullname\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.asciiFullname = match.suffix().str();
+		return true;
+	}
 	string author_role_prefix = ".. |author.role| replace:: ";
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].role\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
@@ -404,9 +417,19 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 		author.surname = match.suffix().str();
 		return true;
 	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].asciiSurname\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.asciiSurname = match.suffix().str();
+		return true;
+	}
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].initials\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
 		author.initials = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].asciiInitials\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.asciiInitials = match.suffix().str();
 		return true;
 	}
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].email\\| replace:: "))) {
@@ -429,6 +452,11 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 		author.code = match.suffix().str();
 		return true;
 	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].organization\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.organization = match.suffix().str();
+		return true;
+	}
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].country\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
 		author.country = match.suffix().str();
@@ -442,6 +470,11 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].street\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
 		author.street = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].postalLine\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.postalLine.emplace_back(match.suffix().str());
 		return true;
 	}
 

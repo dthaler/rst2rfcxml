@@ -263,7 +263,8 @@ TEST_CASE("common header", "[basic]")
   <title abbrev="Abbreviated Title">
 My Title
   </title>
-  <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+  <author initials="J." asciiInitials="J." surname="Doe" asciiSurname="Doe" fullname="John Doe" role="editor" asciiFullname="John Doe">
+    <organization>ACME</organization>
    <address>
     <postal>
     <city>Anytown</city>
@@ -291,9 +292,13 @@ My Title
 .. |titleAbbr| replace:: Abbreviated Title
 .. |submissionType| replace:: IETF
 .. |author[0].fullname| replace:: John Doe
+.. |author[0].asciiFullname| replace:: John Doe
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
+.. |author[0].asciiSurname| replace:: Doe
 .. |author[0].initials| replace:: J.
+.. |author[0].asciiInitials| replace:: J.
+.. |author[0].organization| replace:: ACME
 .. |author[0].email| replace:: johndoe@example.com
 .. |author[0].phone| replace:: 555-1212
 .. |author[0].city| replace:: Anytown
@@ -301,6 +306,63 @@ My Title
 .. |author[0].country| replace:: USA
 .. |author[0].region| replace:: State
 .. |author[0].street| replace:: 123 Main St
+.. header::
+
+========
+My Title
+========
+
+My abstract
+)", expected_output.c_str());
+}
+
+TEST_CASE("postalLine header", "[basic]")
+{
+    string expected_output = BASIC_PREAMBLE;
+    expected_output += R"(
+<rfc ipr="trust200902" docName="draft-sample-test-00" category="std" submissionType="IETF">
+
+ <front>
+  <title abbrev="Abbreviated Title">
+My Title
+  </title>
+  <author initials="J." asciiInitials="J." surname="Doe" asciiSurname="Doe" fullname="John Doe" role="editor" asciiFullname="John Doe">
+    <organization>ACME</organization>
+   <address>
+    <postal>
+    <postalLine>123 Main St</postalLine>
+    <postalLine>Anytown, State 12345</postalLine>
+    </postal>
+    <phone>555-1212</phone>
+    <email>johndoe@example.com</email>
+   </address>
+  </author>
+  <abstract>
+   <t>
+    My abstract
+   </t>
+  </abstract>
+ </front>
+</rfc>
+)";
+    test_rst2rfcxml(R"(
+.. |docName| replace:: draft-sample-test-00
+.. |ipr| replace:: trust200902
+.. |category| replace:: std
+.. |titleAbbr| replace:: Abbreviated Title
+.. |submissionType| replace:: IETF
+.. |author[0].fullname| replace:: John Doe
+.. |author[0].asciiFullname| replace:: John Doe
+.. |author[0].role| replace:: editor
+.. |author[0].surname| replace:: Doe
+.. |author[0].asciiSurname| replace:: Doe
+.. |author[0].initials| replace:: J.
+.. |author[0].asciiInitials| replace:: J.
+.. |author[0].organization| replace:: ACME
+.. |author[0].email| replace:: johndoe@example.com
+.. |author[0].phone| replace:: 555-1212
+.. |author[0].postalLine| replace:: 123 Main St
+.. |author[0].postalLine| replace:: Anytown, State 12345
 .. header::
 
 ========

@@ -22,7 +22,8 @@
   <title abbrev="Sample Abbreviated Title">
 Sample Document Title
   </title>
-  <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+  <author initials="J." surname="Doe" fullname="John Doe" role="editor">
+    <organization>ACME</organization>
    <address>
     <postal>
     <city>Anytown</city>

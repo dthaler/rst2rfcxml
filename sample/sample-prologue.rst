@@ -5,6 +5,7 @@
 .. |submissionType| replace:: IETF
 .. |baseTargetUri| replace:: http://example.com/path
 .. |author[0].fullname| replace:: John Doe
+.. |author[0].organization| replace:: ACME
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
 .. |author[0].initials| replace:: J.

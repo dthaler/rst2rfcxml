@@ -114,10 +114,14 @@ Example:
 
 The document must have at least one author, and can have multiple authors.
 
-* `author[<anchor>].fullname`: Fullname to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].fullname`: Full name to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiFullname`: Optional. ASCII full name to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].organization`: Optional. Affiliation to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].role`: Optional. Role to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].surname`: Surname to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiSurname`: Optional. ASCII surname to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].initials`: Initials to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiInitials`: Optional.  ASCII initials to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].email`: Optional. Email address to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].phone`: Optional. Phone number to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].city`: Optional. City to associate with the author with the indicated `<anchor>`.
@@ -125,11 +129,13 @@ The document must have at least one author, and can have multiple authors.
 * `author[<anchor>].country`: Optional. Country to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].region`: Optional. State or region to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].street`: Optional. Street address to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].postalLine`: Optional, may occur multiple times. Postal address lines to use instead of using street, city, region, code, and country.
 
 Example:
 
 ```rst
 .. |author[0].fullname| replace:: John Doe
+.. |author[0].organization| replace:: ACME
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
 .. |author[0].initials| replace:: J.

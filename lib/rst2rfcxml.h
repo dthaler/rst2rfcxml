@@ -31,9 +31,13 @@ enum class xml_context {
 struct author {
     std::string anchor;
     std::string initials;
+    std::string asciiInitials;
     std::string surname;
+    std::string asciiSurname;
     std::string fullname;
+    std::string asciiFullname;
     std::string role;
+    std::string organization;
     std::string email;
     std::string phone;
     std::string city;
@@ -41,6 +45,7 @@ struct author {
     std::string country;
     std::string region;
     std::string street;
+    std::vector<std::string> postalLine;
 };
 
 struct reference {
