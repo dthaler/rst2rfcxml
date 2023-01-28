@@ -263,7 +263,7 @@ TEST_CASE("common header", "[basic]")
   <title abbrev="Abbreviated Title">
 My Title
   </title>
-  <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+  <author initials="J." asciiInitials="J." surname="Doe" asciiSurname="Doe" fullname="John Doe" role="editor" asciiFullname="John Doe">
     <organization>ACME</organization>
    <address>
     <postal>
@@ -292,9 +292,12 @@ My Title
 .. |titleAbbr| replace:: Abbreviated Title
 .. |submissionType| replace:: IETF
 .. |author[0].fullname| replace:: John Doe
+.. |author[0].asciiFullname| replace:: John Doe
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
+.. |author[0].asciiSurname| replace:: Doe
 .. |author[0].initials| replace:: J.
+.. |author[0].asciiInitials| replace:: J.
 .. |author[0].organization| replace:: ACME
 .. |author[0].email| replace:: johndoe@example.com
 .. |author[0].phone| replace:: 555-1212

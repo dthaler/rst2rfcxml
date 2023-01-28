@@ -114,11 +114,14 @@ Example:
 
 The document must have at least one author, and can have multiple authors.
 
-* `author[<anchor>].fullname`: Fullname to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].fullname`: Full name to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiFullname`: Optional. ASCII full name to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].organization`: Optional. Affiliation to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].role`: Optional. Role to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].surname`: Surname to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiSurname`: Optional. ASCII surname to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].initials`: Initials to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].asciiInitials`: Optional.  ASCII initials to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].email`: Optional. Email address to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].phone`: Optional. Phone number to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].city`: Optional. City to associate with the author with the indicated `<anchor>`.
