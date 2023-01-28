@@ -368,7 +368,7 @@ reference& rst2rfcxml::get_reference_by_anchor(string anchor)
 	}
 
 	// Create a reference.
-	reference reference;
+	reference reference = {};
 	reference.anchor = anchor;
 	_xml_references[anchor] = reference;
 	return _xml_references[anchor];
