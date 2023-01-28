@@ -49,7 +49,7 @@ References
 
 Internal reference: `References`_
 
-External reference: `External reference text <https://exaple.com/path>`_.
+External reference: `External reference text <https://example.com/path>`_.
 
 Blocks
 ======

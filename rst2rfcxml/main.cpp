@@ -17,10 +17,13 @@ int main(int argc, char** argv)
 
 	rst2rfcxml rst2rfcxml;
 	if (output_filename.empty()) {
-		rst2rfcxml.process_files(input_filenames, cout);
+		return rst2rfcxml.process_files(input_filenames, cout);
 	} else {
 		ofstream outfile(output_filename);
-		rst2rfcxml.process_files(input_filenames, outfile);
+		if (!outfile.good()) {
+			std::cerr << "ERROR: can't write " << output_filename << endl;
+			return 1;
+		}
+		return rst2rfcxml.process_files(input_filenames, outfile);
 	}
-	return 0;
 }

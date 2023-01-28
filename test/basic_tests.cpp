@@ -1,5 +1,7 @@
 // Copyright (c) Dave Thaler
 // SPDX-License-Identifier: MIT
+#include <filesystem>
+#include <fstream>
 #include <sstream>
 #include "catch.hpp"
 #include "rst2rfcxml.h"
@@ -307,4 +309,31 @@ My Title
 
 My abstract
 )", expected_output.c_str());
+}
+
+TEST_CASE("sample", "[basic]")
+{
+    // Find path to sample.rst.
+    constexpr int MAX_DEPTH = 4;
+    string path = ".";
+    int depth;
+    for (depth = 0; (depth <= MAX_DEPTH) && !filesystem::exists(path + "\\sample\\sample.rst"); depth++) {
+        path += "\\..";
+    }
+    REQUIRE(depth <= MAX_DEPTH);
+    path += "\\sample\\";
+
+    // Process sample input files.
+    vector<string> input_filenames = { path + "sample-prologue.rst", path + "sample.rst" };
+    rst2rfcxml rst2rfcxml;
+    ostringstream os;
+    REQUIRE(rst2rfcxml.process_files(input_filenames, os) == 0);
+    rst2rfcxml.pop_contexts(0, os);
+    string actual_output = os.str();
+
+    // Get the expected output.
+    ifstream expected_output_file(path + "sample.xml");
+    std::string expected_output((std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
+    
+    REQUIRE(actual_output == expected_output);
 }
