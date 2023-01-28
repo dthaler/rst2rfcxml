@@ -173,4 +173,4 @@ Example:
 * [sample-prologue.rst](sample/sample-prologue.rst): Sample prologue file that goes with sample.rst.
 * [sample.xml](sample/sample.xml): Output of running `rst2rfcxml` on sample-prologue.rst and sample.rst.
 * [sample.txt](sample/sample.txt): Output of running `xml2rfc` on sample.xml.
-* [sample.html](sample/sample.html): Output of running `xml2rfc --html` on sample.xml. ([Browser View](https://htmlpreview.github.io/?https://raw.githubusercontent.com/dthaler/rst2rfcxml/sample/sample.html))
+* [sample.html](sample/sample.html): Output of running `xml2rfc --html` on sample.xml. ([Browser View](https://htmlpreview.github.io/?https://raw.githubusercontent.com/dthaler/rst2rfcxml/main/sample/sample.html))
