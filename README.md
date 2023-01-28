@@ -129,6 +129,7 @@ The document must have at least one author, and can have multiple authors.
 * `author[<anchor>].country`: Optional. Country to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].region`: Optional. State or region to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].street`: Optional. Street address to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].postalLine`: Optional, may occur multiple times. Postal address lines to use instead of using street, city, region, code, and country.
 
 Example:
 

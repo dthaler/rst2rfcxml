@@ -112,6 +112,9 @@ void rst2rfcxml::output_authors(ostream& output_stream) const
 		_output_optional_text_element(output_stream, "country", author.country);
 		_output_optional_text_element(output_stream, "region", author.region);
 		_output_optional_text_element(output_stream, "street", author.street);
+		for (auto postalLine : author.postalLine) {
+			_output_optional_text_element(output_stream, "postalLine", postalLine);
+		}
 		output_stream << "    </postal>" << endl;
 		_output_optional_text_element(output_stream, "phone", author.phone);
 		_output_optional_text_element(output_stream, "email", author.email);
@@ -467,6 +470,11 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].street\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
 		author.street = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].postalLine\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.postalLine.emplace_back(match.suffix().str());
 		return true;
 	}
 

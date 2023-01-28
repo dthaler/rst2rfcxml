@@ -45,6 +45,7 @@ struct author {
     std::string country;
     std::string region;
     std::string street;
+    std::vector<std::string> postalLine;
 };
 
 struct reference {
