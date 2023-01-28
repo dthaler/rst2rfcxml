@@ -136,6 +136,8 @@ Example:
 .. |author[0].email| replace:: johndoe@example.com
 .. |author[0].phone| replace:: 555-1212
 .. |author[0].city| replace:: Anytown
+.. |author[0].region| replace:: WA
+.. |author[0].country| replace:: USA
 ```
 
 The `<anchor>` values do not appear in the XML but are merely
@@ -164,3 +166,11 @@ Example:
 .. |ref[SAMPLE].target| replace:: https://example.com/path
 .. |ref[SAMPLE].type| replace:: normative
 ```
+
+## Sample Files
+
+* [sample.rst](sample/sample.rst): Sample RST file to convert.
+* [sample-prologue.rst](sample/sample-prologue.rst): Sample prologue file that goes with sample.rst.
+* [sample.xml](sample/sample.xml): Output of running `rst2rfcxml` on sample-prologue.rst and sample.rst.
+* [sample.txt](sample/sample.txt): Output of running `xml2rfc` on sample.xml.
+* [sample.html](sample/sample.html): Output of running `xml2rfc --html` on sample.xml. ([Browser View](https://htmlpreview.github.io/?https://raw.githubusercontent.com/dthaler/rst2rfcxml/sample/sample.html))
