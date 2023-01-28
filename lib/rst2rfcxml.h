@@ -53,7 +53,7 @@ struct reference {
 
 class rst2rfcxml {
 public:
-    void process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
+    int process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
     void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
 

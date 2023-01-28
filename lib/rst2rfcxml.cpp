@@ -806,13 +806,18 @@ void rst2rfcxml::output_back(ostream& output_stream)
 }
 
 // Process multiple input files that contribute to an output file.
-void rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
+int rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {
 	for (auto input_filename : input_filenames) {
 		ifstream input_file(input_filename);
+		if (!input_file.good()) {
+			std::cerr << fmt::format("ERROR: can't read {} (cwd: {})", input_filename, std::filesystem::current_path().string()) << endl;
+			return 1;
+		}
 		process_input_stream(input_file, output_stream);
 	}
 	pop_contexts(1, output_stream);
 	output_back(output_stream);
 	pop_contexts(0, output_stream);
+	return 0;
 }
