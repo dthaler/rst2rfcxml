@@ -100,6 +100,7 @@ void rst2rfcxml::output_authors(ostream& output_stream) const
 		_output_optional_attribute(output_stream, "surname", author.surname);
 		_output_optional_attribute(output_stream, "role", author.role);
 		output_stream << ">" << endl;
+		_output_optional_text_element(output_stream, "organization", author.organization);
 		output_stream << "   <address>" << endl;
 		output_stream << "    <postal>" << endl;
 		_output_optional_text_element(output_stream, "city", author.city);
@@ -427,6 +428,11 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].code\\| replace:: "))) {
 		author& author = get_author_by_anchor(match[1]);
 		author.code = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].organization\\| replace:: "))) {
+		author& author = get_author_by_anchor(match[1]);
+		author.organization = match.suffix().str();
 		return true;
 	}
 	if (regex_search(line.c_str(), match, regex("^.. \\|author\\[([\\w-]+)\\].country\\| replace:: "))) {

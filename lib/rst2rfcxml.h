@@ -34,6 +34,7 @@ struct author {
     std::string surname;
     std::string fullname;
     std::string role;
+    std::string organization;
     std::string email;
     std::string phone;
     std::string city;

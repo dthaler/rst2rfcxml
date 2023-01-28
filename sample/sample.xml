@@ -23,6 +23,7 @@
 Sample Document Title
   </title>
   <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+    <organization>ACME</organization>
    <address>
     <postal>
     <city>Anytown</city>

@@ -264,6 +264,7 @@ TEST_CASE("common header", "[basic]")
 My Title
   </title>
   <author fullname="John Doe" initials="J." surname="Doe" role="editor">
+    <organization>ACME</organization>
    <address>
     <postal>
     <city>Anytown</city>
@@ -294,6 +295,7 @@ My Title
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
 .. |author[0].initials| replace:: J.
+.. |author[0].organization| replace:: ACME
 .. |author[0].email| replace:: johndoe@example.com
 .. |author[0].phone| replace:: 555-1212
 .. |author[0].city| replace:: Anytown

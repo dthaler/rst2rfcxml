@@ -115,6 +115,7 @@ Example:
 The document must have at least one author, and can have multiple authors.
 
 * `author[<anchor>].fullname`: Fullname to associate with the author with the indicated `<anchor>`.
+* `author[<anchor>].organization`: Optional. Affiliation to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].role`: Optional. Role to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].surname`: Surname to associate with the author with the indicated `<anchor>`.
 * `author[<anchor>].initials`: Initials to associate with the author with the indicated `<anchor>`.
@@ -130,6 +131,7 @@ Example:
 
 ```rst
 .. |author[0].fullname| replace:: John Doe
+.. |author[0].organization| replace:: ACME
 .. |author[0].role| replace:: editor
 .. |author[0].surname| replace:: Doe
 .. |author[0].initials| replace:: J.
