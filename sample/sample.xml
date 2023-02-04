@@ -53,12 +53,23 @@ Sample Document Title
      <li>
       First
      </li>
-    </ul>
-    <ul>
      <li>
       Second
      </li>
     </ul>
+   </section>
+   <section anchor="numbered-list" title="Numbered list">
+    <t>
+     The following is a numbered list using decimal numbers:
+    </t>
+    <ol>
+     <li>
+      First
+     </li>
+     <li>
+      Second
+     </li>
+    </ol>
    </section>
    <section anchor="definition-list" title="Definition list">
     <t>

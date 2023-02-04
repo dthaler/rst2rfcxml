@@ -17,6 +17,7 @@ enum class xml_context {
     FRONT,
     LIST_ELEMENT,
     MIDDLE,
+    ORDERED_LIST,
     RFC,
     SECTION,
     SOURCE_CODE,

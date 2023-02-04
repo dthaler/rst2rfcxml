@@ -18,8 +18,15 @@ Unnumbered list
 The following is an unnumbered list:
 
 * First
-
 * Second
+
+Numbered list
+---------------
+
+The following is a numbered list using decimal numbers:
+
+1. First
+2. Second
 
 Definition list
 ---------------
