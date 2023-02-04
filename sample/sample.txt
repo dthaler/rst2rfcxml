@@ -4,8 +4,8 @@
 
 Network Working Group                                        J. Doe, Ed.
 Internet-Draft                                                      ACME
-Intended status: Standards Track                         28 January 2023
-Expires: 1 August 2023
+Intended status: Standards Track                         3 February 2023
+Expires: 7 August 2023
 
 
                          Sample Document Title
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 August 2023.
+   This Internet-Draft will expire on 7 August 2023.
 
 Copyright Notice
 
@@ -53,18 +53,19 @@ Copyright Notice
 
 
 
-Doe                       Expires 1 August 2023                 [Page 1]
+Doe                       Expires 7 August 2023                 [Page 1]
 
-Internet-Draft          Sample Abbreviated Title            January 2023
+Internet-Draft          Sample Abbreviated Title           February 2023
 
 
 Table of Contents
 
    1.  Lists . . . . . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Unnumbered list . . . . . . . . . . . . . . . . . . . . .   2
-     1.2.  Definition list . . . . . . . . . . . . . . . . . . . . .   2
+     1.2.  Numbered list . . . . . . . . . . . . . . . . . . . . . .   2
+     1.3.  Definition list . . . . . . . . . . . . . . . . . . . . .   2
    2.  Emphasis  . . . . . . . . . . . . . . . . . . . . . . . . . .   2
-   3.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   2
+   3.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  Blocks  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
      4.1.  Code blocks . . . . . . . . . . . . . . . . . . . . . . .   3
      4.2.  Block quotes  . . . . . . . . . . . . . . . . . . . . . .   3
@@ -82,7 +83,15 @@ Table of Contents
 
    *  Second
 
-1.2.  Definition list
+1.2.  Numbered list
+
+   The following is a numbered list using decimal numbers:
+
+   1.  First
+
+   2.  Second
+
+1.3.  Definition list
 
    The following is a definition list:
 
@@ -97,6 +106,14 @@ Table of Contents
 
    Fixed-width term: term
 
+
+
+
+Doe                       Expires 7 August 2023                 [Page 2]
+
+Internet-Draft          Sample Abbreviated Title           February 2023
+
+
    Bold term: *term*
 
    Italics term: _term_
@@ -106,13 +123,6 @@ Table of Contents
    Internal reference: References (Section 3)
 
    External reference: External reference text [SAMPLE].
-
-
-
-Doe                       Expires 1 August 2023                 [Page 2]
-
-Internet-Draft          Sample Abbreviated Title            January 2023
-
 
 4.  Blocks
 
@@ -151,6 +161,15 @@ Internet-Draft          Sample Abbreviated Title            January 2023
 
 Author's Address
 
+
+
+
+
+Doe                       Expires 7 August 2023                 [Page 3]
+
+Internet-Draft          Sample Abbreviated Title           February 2023
+
+
    John Doe (editor)
    ACME
    Anytown, WA
@@ -165,4 +184,41 @@ Author's Address
 
 
 
-Doe                       Expires 1 August 2023                 [Page 3]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Doe                       Expires 7 August 2023                 [Page 4]

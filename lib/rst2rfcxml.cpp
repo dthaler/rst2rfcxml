@@ -154,6 +154,9 @@ void rst2rfcxml::pop_context(ostream& output_stream)
 	case xml_context::MIDDLE:
 		output_stream << "</middle>" << endl;
 		break;
+	case xml_context::ORDERED_LIST:
+		output_stream << "</ol>" << endl;
+		break;
 	case xml_context::RFC:
 		output_stream << "</rfc>" << endl;
 		break;
@@ -731,7 +734,19 @@ bool rst2rfcxml::in_context(xml_context context) const
 // Output the previous line.
 void rst2rfcxml::output_line(string line, ostream& output_stream)
 {
-	if (line.starts_with("* ")) {
+	cmatch match;
+	if (regex_search(line.c_str(), match, regex("^[\\d]+. "))) {
+		if (in_context(xml_context::LIST_ELEMENT)) {
+			pop_context(output_stream);
+		}
+		if (!in_context(xml_context::ORDERED_LIST)) {
+			output_stream << _spaces(_contexts.size()) << "<ol>" << endl;
+			_contexts.push(xml_context::ORDERED_LIST);
+		}
+		output_stream << fmt::format("{}<li>", _spaces(_contexts.size())) << endl;
+		_contexts.push(xml_context::LIST_ELEMENT);
+		output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(match.suffix())) << endl;
+	} else if (line.starts_with("* ")) {
 		if (in_context(xml_context::LIST_ELEMENT)) {
 			pop_context(output_stream);
 		}
@@ -773,6 +788,7 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 			if (in_context(xml_context::BLOCKQUOTE) ||
 				in_context(xml_context::DEFINITION_DESCRIPTION) ||
 				in_context(xml_context::LIST_ELEMENT) ||
+				in_context(xml_context::ORDERED_LIST) ||
 				in_context(xml_context::TEXT) ||
 				in_context(xml_context::UNORDERED_LIST)) {
 				pop_context(output_stream);
