@@ -60,7 +60,8 @@ struct reference {
 class rst2rfcxml {
 public:
     int process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
-    void process_input_stream(std::istream& input_stream, std::ostream& output_stream);
+    int process_file(std::filesystem::path input_filename, std::ostream& output_stream);
+    int process_input_stream(std::istream& input_stream, std::ostream& output_stream);
     void pop_contexts(int level, std::ostream& output_stream);
 
 private:
@@ -74,7 +75,7 @@ private:
     void output_authors(std::ostream& output_stream) const;
     void pop_context(std::ostream& output_stream);
     void pop_contexts_until(xml_context end, std::ostream& output_stream);
-    void process_line(std::string current, std::string next, std::ostream& output_stream);
+    int process_line(std::string current, std::string next, std::ostream& output_stream);
     bool in_context(xml_context context) const;
     bool handle_variable_initializations(std::string line);
     bool handle_table_line(std::string current, std::string next, std::ostream& output_stream);

@@ -635,21 +635,21 @@ bool rst2rfcxml::handle_title_line(string current, string next, ostream& output_
 }
 
 // Process a new line of input.
-void rst2rfcxml::process_line(string current, string next, ostream& output_stream)
+int rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 {
 	if (current == ".. contents::") {
 		// Include table of contents.
 		// This is already the default in rfc2xml.
-		return;
+		return 0;
 	}
 	if (current == ".. sectnum::") {
 		// Number sections.
 		// This is already the default in rfc2xml.
-		return;
+		return 0;
 	}
 	if (current == ".. header::") {
 		output_header(output_stream);
-		return;
+		return 0;
 	}
 	if (current == ".. code-block::") {
 		if (in_context(xml_context::TEXT)) {
@@ -658,7 +658,13 @@ void rst2rfcxml::process_line(string current, string next, ostream& output_strea
 		output_stream << _spaces(_contexts.size()) << "<sourcecode>" << endl;
 		_contexts.push(xml_context::SOURCE_CODE);
 		_source_code_skip_blank_lines = true;
-		return;
+		return 0;
+	}
+	if (current.starts_with(".. include:: ")) {
+		filesystem::path input_filename = filesystem::absolute(filesystem::relative(current.substr(13)));
+
+		// Recursively process filename.
+		return process_file(input_filename, output_stream);
 	}
 
 	// Close any contexts that end at an unindented line.
@@ -676,31 +682,31 @@ void rst2rfcxml::process_line(string current, string next, ostream& output_strea
 
 	// Title lines must be handled before table lines.
 	if (handle_title_line(current, next, output_stream)) {
-		return;
+		return 0;
 	}
 
 	// Handle tables first, where escapes must be dealt with per
 	// cell, in order to preserve column locations.
 	if (handle_table_line(current, next, output_stream)) {
-		return;
+		return 0;
 	}
 
 	if (handle_variable_initializations(current)) {
-		return;
+		return 0;
 	}
 
 	// Handle source code.
 	if (in_context(xml_context::SOURCE_CODE)) {
 		if (current.find_first_not_of(" ") == string::npos) {
 			if (_source_code_skip_blank_lines) {
-				return;
+				return 0;
 			}
 			_source_code_skip_blank_lines = true;
 		} else {
 			_source_code_skip_blank_lines = false;
 		}
 		output_stream << current << endl;
-		return;
+		return 0;
 	}
 
 	// Handle definition lists.
@@ -720,10 +726,11 @@ void rst2rfcxml::process_line(string current, string next, ostream& output_strea
 		pop_contexts_until(xml_context::SECTION, output_stream);
 		output_stream << _spaces(_contexts.size()) << "<blockquote>";
 		_contexts.push(xml_context::BLOCKQUOTE);
-		return;
+		return 0;
 	}
 
 	output_line(current, output_stream);
+	return 0;
 }
 
 bool rst2rfcxml::in_context(xml_context context) const
@@ -800,15 +807,18 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 }
 
 // Process all lines in an input stream.
-void rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_stream)
+int rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_stream)
 {
 	string line;
 	_previous_line.clear();
 	while (getline(input_stream, line)) {
-		process_line(_previous_line, line, output_stream);
+		int error = process_line(_previous_line, line, output_stream);
+		if (error) {
+			return error;
+		}
 		_previous_line = line;
 	}
-	process_line(_previous_line, {}, output_stream);
+	return process_line(_previous_line, {}, output_stream);
 }
 
 void rst2rfcxml::output_references(ostream& output_stream, string type, string title)
@@ -854,16 +864,30 @@ void rst2rfcxml::output_back(ostream& output_stream)
 	output_references(output_stream, "informative", "Informative References");
 }
 
+// Process an input file that contributes to an output file.
+int rst2rfcxml::process_file(filesystem::path input_filename, ostream& output_stream)
+{
+	ifstream input_file(input_filename);
+	if (!input_file.good()) {
+		std::cerr << fmt::format("ERROR: can't read {} (cwd: {})", input_filename.string(), filesystem::current_path().string()) << endl;
+		return 1;
+	}
+	filesystem::path parent_path = input_filename.parent_path();
+	filesystem::path original_path = filesystem::current_path();
+	filesystem::current_path(parent_path);
+	int error = process_input_stream(input_file, output_stream);
+	filesystem::current_path(original_path);
+	return error;
+}
+
 // Process multiple input files that contribute to an output file.
 int rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {
 	for (auto input_filename : input_filenames) {
-		ifstream input_file(input_filename);
-		if (!input_file.good()) {
-			std::cerr << fmt::format("ERROR: can't read {} (cwd: {})", input_filename, std::filesystem::current_path().string()) << endl;
-			return 1;
+		int error = process_file(input_filename, output_stream);
+		if (error) {
+			return error;
 		}
-		process_input_stream(input_file, output_stream);
 	}
 	pop_contexts(1, output_stream);
 	output_back(output_stream);
