@@ -83,6 +83,14 @@ Following is a block quote:
   This is quoted text
   that goes in a block quote.
 
+Literal blocks
+--------------
+
+Following is a literal block:
+
+         This is text
+  that goes in a literal block.
+
 Tables
 ======
 

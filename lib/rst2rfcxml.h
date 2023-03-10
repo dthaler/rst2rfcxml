@@ -9,8 +9,10 @@
 
 enum class xml_context {
     ABSTRACT,
+    ARTWORK,
     BACK,
     BLOCKQUOTE,
+    CONSUME_BLANK_LINE, // Pseudo XML context that maps to nothing.
     DEFINITION_LIST,
     DEFINITION_TERM,
     DEFINITION_DESCRIPTION,
@@ -95,7 +97,6 @@ private:
     std::stack<xml_context> _contexts;
     std::map<std::string, std::string> _rst_references;
     std::map<std::string, reference> _xml_references;
-    bool _source_code_skip_blank_lines;
 
     // Some RST markup modifies the previous line, so we need to
     // keep track of the previous line and process it only after

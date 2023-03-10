@@ -125,16 +125,24 @@ void rst2rfcxml::output_authors(ostream& output_stream) const
 
 void rst2rfcxml::pop_context(ostream& output_stream)
 {
-	output_stream << _spaces(_contexts.size() - 1);
+	if (_contexts.top() != xml_context::CONSUME_BLANK_LINE) {
+		output_stream << _spaces(_contexts.size() - 1);
+	}
 	switch (_contexts.top()) {
 	case xml_context::ABSTRACT:
 		output_stream << "</abstract>" << endl;
+		break;
+	case xml_context::ARTWORK:
+		output_stream << "</artwork>" << endl;
 		break;
 	case xml_context::BACK:
 		output_stream << "</back>" << endl;
 		break;
 	case xml_context::BLOCKQUOTE:
 		output_stream << "</blockquote>" << endl;
+		break;
+	case xml_context::CONSUME_BLANK_LINE:
+		// Nothing to do.
 		break;
 	case xml_context::DEFINITION_DESCRIPTION:
 		output_stream << "</dd>" << endl;
@@ -657,7 +665,7 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 		}
 		output_stream << _spaces(_contexts.size()) << "<sourcecode>" << endl;
 		_contexts.push(xml_context::SOURCE_CODE);
-		_source_code_skip_blank_lines = true;
+		_contexts.push(xml_context::CONSUME_BLANK_LINE);
 		return 0;
 	}
 	if (current.starts_with(".. include:: ")) {
@@ -673,9 +681,15 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 			pop_context(output_stream);
 		}
 	}
-	if (current.find_first_not_of(" ") == string::npos &&
-		!next.empty() && !isspace(next[0])) {
-		if (in_context(xml_context::SOURCE_CODE)) {
+
+	// Close any contexts that end at a blank line.
+	if (current.find_first_not_of(" ") == string::npos) {
+		if (in_context(xml_context::CONSUME_BLANK_LINE)) {
+			pop_context(output_stream);
+			return 0;
+		}
+		if (!next.empty() && !isspace(next[0]) &&
+			(in_context(xml_context::ARTWORK) || in_context(xml_context::SOURCE_CODE))) {
 			pop_context(output_stream);
 		}
 	}
@@ -695,16 +709,8 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 		return 0;
 	}
 
-	// Handle source code.
-	if (in_context(xml_context::SOURCE_CODE)) {
-		if (current.find_first_not_of(" ") == string::npos) {
-			if (_source_code_skip_blank_lines) {
-				return 0;
-			}
-			_source_code_skip_blank_lines = true;
-		} else {
-			_source_code_skip_blank_lines = false;
-		}
+	// Handle source code and artwork, which preserve literal indentation.
+	if (in_context(xml_context::ARTWORK) || in_context(xml_context::SOURCE_CODE)) {
 		output_stream << current << endl;
 		return 0;
 	}
@@ -720,11 +726,39 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 		_contexts.push(xml_context::DEFINITION_TERM);
 	}
 
+	// Handle artwork.
+	// Blank lines are required before and after a literal block.
+	if (!in_context(xml_context::SOURCE_CODE) && next.empty()) {
+		size_t pos = current.find("::");
+		if (pos != string::npos) {
+			// Get the prefix before the "::", converting:
+			//  "Blah::" to "Blah:"
+			//  "Blah ::" to "Blah "
+			size_t length = pos;
+			if ((pos > 0) && !isspace(current[pos - 1])) {
+				length++;
+			}
+			string prefix = current.substr(0, length);
+			if (prefix.find_first_not_of(" ") != string::npos) {
+				int error = process_line(prefix, "::", output_stream);
+				if (error) {
+					return error;
+				}
+			}
+			pop_contexts_until(xml_context::SECTION, output_stream);
+			output_stream << _spaces(_contexts.size()) << "<artwork>" << endl;
+			_contexts.push(xml_context::ARTWORK);
+			_contexts.push(xml_context::CONSUME_BLANK_LINE);
+			return 0;
+		}
+	}
+
 	// Handle blockquote.
+	// Blank lines are required before and after a block quote, but these blank lines are not included as part of the block quote.
 	if (next.starts_with("  ") && (next.find_first_not_of(" =") != string::npos) &&
-		current.empty() && !in_context(xml_context::SOURCE_CODE)) {
+		current.empty() && !in_context(xml_context::SOURCE_CODE) && !in_context(xml_context::ARTWORK)) {
 		pop_contexts_until(xml_context::SECTION, output_stream);
-		output_stream << _spaces(_contexts.size()) << "<blockquote>";
+		output_stream << _spaces(_contexts.size()) << "<blockquote>" << endl;
 		_contexts.push(xml_context::BLOCKQUOTE);
 		return 0;
 	}
@@ -764,12 +798,15 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 		output_stream << fmt::format("{}<li>", _spaces(_contexts.size())) << endl;
 		_contexts.push(xml_context::LIST_ELEMENT);
 		output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2))) << endl;
-	} else if (line.find_first_not_of(" ") != string::npos) {
+	}
+	else if (line.find_first_not_of(" ") != string::npos) {
 		if (in_context(xml_context::DEFINITION_TERM) && line.starts_with("  ")) {
 			pop_context(output_stream);
 			output_stream << _spaces(_contexts.size()) << "<dd>" << endl;
 			_contexts.push(xml_context::DEFINITION_DESCRIPTION);
-		} else if (!in_context(xml_context::BLOCKQUOTE) &&
+		}
+		else if (!in_context(xml_context::BLOCKQUOTE) &&
+			!in_context(xml_context::CONSUME_BLANK_LINE) &&
 			!in_context(xml_context::DEFINITION_DESCRIPTION) &&
 			!in_context(xml_context::DEFINITION_TERM) &&
 			!in_context(xml_context::LIST_ELEMENT) &&
@@ -792,7 +829,9 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 	if (line.find_first_not_of(" ") == string::npos) {
 		// End any contexts that end at a blank line.
 		while (!_contexts.empty()) {
-			if (in_context(xml_context::BLOCKQUOTE) ||
+			if (in_context(xml_context::ARTWORK) ||
+				in_context(xml_context::BLOCKQUOTE) ||
+				in_context(xml_context::CONSUME_BLANK_LINE) ||
 				in_context(xml_context::DEFINITION_DESCRIPTION) ||
 				in_context(xml_context::LIST_ELEMENT) ||
 				in_context(xml_context::ORDERED_LIST) ||

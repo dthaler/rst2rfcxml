@@ -71,6 +71,68 @@ done
 )");
 }
 
+TEST_CASE("artwork", "[basic]")
+{
+    test_rst2rfcxml(R"(
+Paragraph:
+
+::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+
+    test_rst2rfcxml(R"(
+Paragraph: ::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+
+    test_rst2rfcxml(R"(
+Paragraph::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+}
+
 TEST_CASE("block quote", "[basic]")
 {
     test_rst2rfcxml(R"(
@@ -78,7 +140,8 @@ TEST_CASE("block quote", "[basic]")
   This is indented.
 
 done
-)", R"(<blockquote> This is indented.
+)", R"(<blockquote>
+ This is indented.
 </blockquote>
 <t>
  done
