@@ -137,9 +137,19 @@ Sample Document Title
     <t>
      Following is a block quote:
     </t>
-    <blockquote>     This is quoted text
+    <blockquote>
+     This is quoted text
      that goes in a block quote.
     </blockquote>
+   </section>
+   <section anchor="literal-blocks" title="Literal blocks">
+    <t>
+     Following is a literal block:
+    </t>
+    <artwork>
+         This is text
+  that goes in a literal block.
+    </artwork>
    </section>
   </section>
   <section anchor="tables" title="Tables">

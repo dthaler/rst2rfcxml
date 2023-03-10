@@ -28,7 +28,6 @@ TEST_CASE("escapes", "[basic]")
     test_rst2rfcxml("&", "<t>\n &amp;\n</t>\n");
     test_rst2rfcxml("<", "<t>\n &lt;\n</t>\n");
     test_rst2rfcxml(">", "<t>\n &gt;\n</t>\n");
-    test_rst2rfcxml("::", "<t>\n :\n</t>\n");
     test_rst2rfcxml("``foo``", "<t>\n <tt>foo</tt>\n</t>\n");
     test_rst2rfcxml("\\*\\*foo\\*\\*", "<t>\n **foo**\n</t>\n");
     test_rst2rfcxml("**foo**", "<t>\n <strong>foo</strong>\n</t>\n");
@@ -71,6 +70,68 @@ done
 )");
 }
 
+TEST_CASE("artwork", "[basic]")
+{
+    test_rst2rfcxml(R"(
+Paragraph:
+
+::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+
+    test_rst2rfcxml(R"(
+Paragraph: ::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+
+    test_rst2rfcxml(R"(
+Paragraph::
+
+  Literal block
+     of text
+
+done
+)", R"(<t>
+ Paragraph:
+</t>
+<artwork>
+  Literal block
+     of text
+</artwork>
+<t>
+ done
+</t>
+)");
+}
+
 TEST_CASE("block quote", "[basic]")
 {
     test_rst2rfcxml(R"(
@@ -78,7 +139,8 @@ TEST_CASE("block quote", "[basic]")
   This is indented.
 
 done
-)", R"(<blockquote> This is indented.
+)", R"(<blockquote>
+ This is indented.
 </blockquote>
 <t>
  done
