@@ -283,6 +283,24 @@ TEST_CASE("unordered list", "[basic]")
 )");
 }
 
+TEST_CASE("unordered list extended", "[basic]")
+{
+    test_rst2rfcxml(R"(
+* One
+* Two with a continuation
+  of the same line.
+)", R"(<ul>
+ <li>
+  One
+ </li>
+ <li>
+  Two with a continuation
+  of the same line.
+ </li>
+</ul>
+)");
+}
+
 TEST_CASE("ordered list", "[basic]")
 {
     test_rst2rfcxml(R"(

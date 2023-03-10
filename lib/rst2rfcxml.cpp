@@ -717,7 +717,7 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 
 	// Handle definition lists.
 	if (next.starts_with("  ") && (next.find_first_not_of(" ") != string::npos) &&
-		!current.empty() && !isspace(current[0])) {
+		!current.empty() && !isspace(current[0]) && !current.starts_with("* ")) {
 		if (!in_context(xml_context::DEFINITION_LIST)) {
 			output_stream << _spaces(_contexts.size()) << "<dl>" << endl;
 			_contexts.push(xml_context::DEFINITION_LIST);
