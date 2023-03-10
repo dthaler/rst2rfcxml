@@ -86,7 +86,7 @@ Following is a block quote:
 Literal blocks
 --------------
 
-Following is a literal block:
+Following is a literal block::
 
          This is text
   that goes in a literal block.

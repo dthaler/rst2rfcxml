@@ -147,8 +147,8 @@ Sample Document Title
      Following is a literal block:
     </t>
     <artwork>
-            This is text
-     that goes in a literal block.
+         This is text
+  that goes in a literal block.
     </artwork>
    </section>
   </section>

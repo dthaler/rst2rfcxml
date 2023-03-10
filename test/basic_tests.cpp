@@ -28,7 +28,6 @@ TEST_CASE("escapes", "[basic]")
     test_rst2rfcxml("&", "<t>\n &amp;\n</t>\n");
     test_rst2rfcxml("<", "<t>\n &lt;\n</t>\n");
     test_rst2rfcxml(">", "<t>\n &gt;\n</t>\n");
-    test_rst2rfcxml("::", "<t>\n :\n</t>\n");
     test_rst2rfcxml("``foo``", "<t>\n <tt>foo</tt>\n</t>\n");
     test_rst2rfcxml("\\*\\*foo\\*\\*", "<t>\n **foo**\n</t>\n");
     test_rst2rfcxml("**foo**", "<t>\n <strong>foo</strong>\n</t>\n");
