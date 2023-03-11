@@ -921,7 +921,9 @@ int rst2rfcxml::process_file(filesystem::path input_filename, ostream& output_st
 	}
 	filesystem::path parent_path = input_filename.parent_path();
 	filesystem::path original_path = filesystem::current_path();
-	filesystem::current_path(parent_path);
+	if (!parent_path.empty()) {
+		filesystem::current_path(parent_path);
+	}
 	int error = process_input_stream(input_file, output_stream);
 	filesystem::current_path(original_path);
 	return error;
