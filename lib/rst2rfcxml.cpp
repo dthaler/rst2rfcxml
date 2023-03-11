@@ -311,6 +311,16 @@ string rst2rfcxml::replace_links(string line)
 	return line;
 }
 
+static string _handle_xml_escapes(string line)
+{
+	// Escape things XML requires to be escaped.
+	line = _replace_all(line, "&", "&amp;");
+	line = _replace_all(line, "<", "&lt;");
+	line = _replace_all(line, ">", "&gt;");
+
+	return line;
+}
+
 // Handle escapes.
 static string _handle_escapes(string line)
 {
@@ -318,9 +328,7 @@ static string _handle_escapes(string line)
 	line = _trim(line);
 
 	// Escape things XML requires to be escaped.
-	line = _replace_all(line, "&", "&amp;");
-	line = _replace_all(line, "<", "&lt;");
-	line = _replace_all(line, ">", "&gt;");
+	line = _handle_xml_escapes(line);
 
 	// Replace paired items, which must be done after escaping <>.
 	line = _replace_all_paired(line, "``", "tt");
@@ -711,7 +719,7 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 
 	// Handle source code and artwork, which preserve literal indentation.
 	if (in_context(xml_context::ARTWORK) || in_context(xml_context::SOURCE_CODE)) {
-		output_stream << current << endl;
+		output_stream << _handle_xml_escapes(current) << endl;
 		return 0;
 	}
 

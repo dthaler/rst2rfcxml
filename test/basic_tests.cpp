@@ -58,11 +58,13 @@ TEST_CASE("code block", "[basic]")
 
    foo
       bar
+   z = (2 * x < y) + (3 * (a & b) > c)
 
 done
 )", R"(<sourcecode>
    foo
       bar
+   z = (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
 </sourcecode>
 <t>
  done
@@ -79,6 +81,7 @@ Paragraph:
 
   Literal block
      of text
+  (2 * x < y) + (3 * (a & b) > c)
 
 done
 )", R"(<t>
@@ -87,6 +90,7 @@ done
 <artwork>
   Literal block
      of text
+  (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
 </artwork>
 <t>
  done
