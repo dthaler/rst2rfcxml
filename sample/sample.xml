@@ -177,7 +177,7 @@ Sample Document Title
  <references><name>Normative References</name>
   <reference anchor="SAMPLE" target="https://example.com/path">
    <front>
-    <title>BTF</title>
+    <title>Sample Reference Title</title>
     <author></author>
    </front>
   </reference>

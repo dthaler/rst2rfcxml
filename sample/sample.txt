@@ -157,7 +157,7 @@ Internet-Draft          Sample Abbreviated Title           February 2023
 
 6.  Normative References
 
-   [SAMPLE]   "BTF", <https://example.com/path>.
+   [SAMPLE]   "Sample Reference Title", <https://example.com/path>.
 
 Author's Address
 

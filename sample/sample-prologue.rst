@@ -14,7 +14,7 @@
 .. |author[0].city| replace:: Anytown
 .. |author[0].region| replace:: WA
 .. |author[0].country| replace:: USA
-.. |ref[SAMPLE].title| replace:: BTF
+.. |ref[SAMPLE].title| replace:: Sample Reference Title
 .. |ref[SAMPLE].target| replace:: https://example.com/path
 .. |ref[SAMPLE].type| replace:: normative
 .. header::
