@@ -251,6 +251,7 @@ Name  Description
 ====  ===============
 Foo   Example
 Bar   Another example
+      Second line
 ====  ===============
 
 )", R"(<table><thead><tr>
@@ -259,12 +260,79 @@ Bar   Another example
  </tr></thead>
  <tbody>
   <tr>
-   <td>Foo</td>
-   <td>Example</td>
+   <td>
+    <t>
+     Foo
+    </t>
+   </td>
+   <td>
+    <t>
+     Example
+    </t>
+   </td>
   </tr>
   <tr>
-   <td>Bar</td>
-   <td>Another example</td>
+   <td>
+    <t>
+     Bar
+    </t>
+   </td>
+   <td>
+    <t>
+     Another example
+     Second line
+    </t>
+   </td>
+  </tr>
+ </tbody>
+</table>
+)");
+}
+
+TEST_CASE("table with literal cell", "[basic]")
+{
+    test_rst2rfcxml(R"(
+
+====  ===============
+Name  Description
+====  ===============
+Foo   Example::
+
+        *x* &y& <z>
+Bar   Another example
+====  ===============
+
+)", R"(<table><thead><tr>
+  <th>Name</th>
+  <th>Description</th>
+ </tr></thead>
+ <tbody>
+  <tr>
+   <td>
+    <t>
+     Foo
+    </t>
+   </td>
+   <td>
+    <t>
+     Example:
+    </t>
+    <artwork>
+  *x* &amp;y&amp; &lt;z&gt;
+    </artwork>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <t>
+     Bar
+    </t>
+   </td>
+   <td>
+    <t>
+     Another example
+    </t>
+   </td>
   </tr>
  </tbody>
 </table>
