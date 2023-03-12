@@ -97,6 +97,6 @@ Tables
 ====  =====  ==============
 name  value  notes
 ====  =====  ==============
-foo     1    Some note text
-bar     2    Another note
+foo   1      Some note text
+bar   2      Another note
 ====  =====  ==============

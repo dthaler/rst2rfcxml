@@ -24,8 +24,10 @@ enum class xml_context {
     SECTION,
     SOURCE_CODE,
     TABLE,
-    TABLE_HEADER,
     TABLE_BODY,
+    TABLE_CELL,
+    TABLE_HEADER,
+    TABLE_ROW,
     TEXT,
     TITLE,
     UNORDERED_LIST,
@@ -64,7 +66,7 @@ public:
     int process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
     int process_file(std::filesystem::path input_filename, std::ostream& output_stream);
     int process_input_stream(std::istream& input_stream, std::ostream& output_stream);
-    void pop_contexts(int level, std::ostream& output_stream);
+    void pop_contexts(size_t level, std::ostream& output_stream);
 
 private:
     author& get_author_by_anchor(std::string anchor);
@@ -85,6 +87,7 @@ private:
     bool handle_section_title(int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
     std::string replace_links(std::string line);
     std::string handle_escapes_and_links(std::string line);
+    void output_table_row(std::ostream& output_stream);
 
     std::string _document_name;
     std::string _base_target_uri;
@@ -97,6 +100,9 @@ private:
     std::stack<xml_context> _contexts;
     std::map<std::string, std::string> _rst_references;
     std::map<std::string, reference> _xml_references;
+
+    // Collected multi-line RST content of a table cell.
+    std::vector<std::string> _table_cell_rst;
 
     // Some RST markup modifies the previous line, so we need to
     // keep track of the previous line and process it only after

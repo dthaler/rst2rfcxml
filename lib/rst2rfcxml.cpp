@@ -125,6 +125,10 @@ void rst2rfcxml::output_authors(ostream& output_stream) const
 
 void rst2rfcxml::pop_context(ostream& output_stream)
 {
+	if (_contexts.top() == xml_context::TABLE_BODY && !_table_cell_rst.empty()) {
+		// Output last row in the table before closing the table.
+		output_table_row(output_stream);
+	}
 	if (_contexts.top() != xml_context::CONSUME_BLANK_LINE) {
 		output_stream << _spaces(_contexts.size() - 1);
 	}
@@ -180,8 +184,14 @@ void rst2rfcxml::pop_context(ostream& output_stream)
 	case xml_context::TABLE_BODY:
 		output_stream << "</tbody>" << endl;
 		break;
+	case xml_context::TABLE_CELL:
+		output_stream << "</td>" << endl;
+		break;
 	case xml_context::TABLE_HEADER:
 		output_stream << "</tr></thead>" << endl;
+		break;
+	case xml_context::TABLE_ROW:
+		output_stream << "</tr>" << endl;
 		break;
 	case xml_context::TEXT:
 		output_stream << "</t>" << endl;
@@ -199,7 +209,7 @@ void rst2rfcxml::pop_context(ostream& output_stream)
 }
 
 // Pop all XML contexts until we are down to a specified XML level.
-void rst2rfcxml::pop_contexts(int level, ostream& output_stream)
+void rst2rfcxml::pop_contexts(size_t level, ostream& output_stream)
 {
 	while (_contexts.size() > level) {
 		pop_context(output_stream);
@@ -518,7 +528,29 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 	return false;
 }
 
+void rst2rfcxml::output_table_row(ostream& output_stream)
+{
+	output_stream << _spaces(_contexts.size()) << "<tr>" << endl;
+	_contexts.push(xml_context::TABLE_ROW);
+
+	for (int column = 0; column < _column_indices.size(); column++) {
+		size_t context_level = _contexts.size();
+
+		output_stream << _spaces(_contexts.size()) << "<td>" << endl;
+		_contexts.push(xml_context::TABLE_CELL);
+
+		string rst_content = _table_cell_rst[column];
+		stringstream ss(rst_content);
+		process_input_stream(ss, output_stream);
+
+		pop_contexts(context_level, output_stream);
+	}
+	pop_context(output_stream);
+	_table_cell_rst.clear();
+}
+
 // Perform table handling.
+// Returns true if a valid table line was processed, false if it's not a table line.
 bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_stream)
 {
 	// Process column definitions.
@@ -574,17 +606,31 @@ bool rst2rfcxml::handle_table_line(string current, string next, ostream& output_
 
 	// Process a table body line.
 	if (in_context(xml_context::TABLE_BODY)) {
-		output_stream << _spaces(_contexts.size()) << "<tr>" << endl;
+		// Each line of text starts a new row, except when there is a blank cell in the first column.
+		// In that case, that line of text is parsed as a continuation line.
+		size_t start_column = _column_indices[0];
+		bool new_row = (current.length() > start_column) && !isspace(current[start_column]);
+
+		if (new_row && !_table_cell_rst.empty()) {
+			// Output previous row which is now complete.
+			output_table_row(output_stream);
+		}
+
+		// Queue line segments to table cells.
 		for (int column = 0; column < _column_indices.size(); column++) {
 			size_t start = _column_indices[column];
 			size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
 			string value;
 			if (current.length() >= start) {
-				value = handle_escapes_and_links(current.substr(start, count));
+				value = current.substr(start, count);
 			}
-			output_stream << fmt::format("{} <td>{}</td>", _spaces(_contexts.size()), value) << endl;
+
+			if (new_row) {
+				_table_cell_rst.push_back(value);
+			} else {
+				_table_cell_rst[column] += "\n" + value;
+			}
 		}
-		output_stream << _spaces(_contexts.size()) << "</tr>" << endl;
 		return true;
 	}
 
@@ -651,6 +697,7 @@ bool rst2rfcxml::handle_title_line(string current, string next, ostream& output_
 }
 
 // Process a new line of input.
+// Returns 0 on success, non-zero error code on failure.
 int rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 {
 	if (current == ".. contents::") {
@@ -677,7 +724,9 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 		return 0;
 	}
 	if (current.starts_with(".. include:: ")) {
-		filesystem::path input_filename = filesystem::absolute(filesystem::relative(current.substr(13)));
+		string filename = current.substr(13);
+		filesystem::path relative_path = filesystem::relative(filename);
+		filesystem::path input_filename = filesystem::absolute(relative_path);
 
 		// Recursively process filename.
 		return process_file(input_filename, output_stream);
@@ -746,6 +795,11 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 			if ((pos > 0) && !isspace(current[pos - 1])) {
 				length++;
 			}
+
+			// Get original contect, which might be SECTION or TABLE_CELL,
+			// each of which can contain ARTWORK.
+			size_t context_level = _contexts.size();
+
 			string prefix = current.substr(0, length);
 			if (prefix.find_first_not_of(" ") != string::npos) {
 				int error = process_line(prefix, "::", output_stream);
@@ -753,7 +807,7 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 					return error;
 				}
 			}
-			pop_contexts_until(xml_context::SECTION, output_stream);
+			pop_contexts(context_level, output_stream);
 			output_stream << _spaces(_contexts.size()) << "<artwork>" << endl;
 			_contexts.push(xml_context::ARTWORK);
 			_contexts.push(xml_context::CONSUME_BLANK_LINE);
@@ -765,7 +819,12 @@ int rst2rfcxml::process_line(string current, string next, ostream& output_stream
 	// Blank lines are required before and after a block quote, but these blank lines are not included as part of the block quote.
 	if (next.starts_with("  ") && (next.find_first_not_of(" =") != string::npos) &&
 		current.empty() && !in_context(xml_context::SOURCE_CODE) && !in_context(xml_context::ARTWORK)) {
-		pop_contexts_until(xml_context::SECTION, output_stream);
+		// Pop contexts until SECTION or TABLE_CELL.
+		while ((_contexts.size() > 0) && (_contexts.top() != xml_context::SECTION) &&
+			(_contexts.top() != xml_context::TABLE_CELL)) {
+			pop_context(output_stream);
+		}
+
 		output_stream << _spaces(_contexts.size()) << "<blockquote>" << endl;
 		_contexts.push(xml_context::BLOCKQUOTE);
 		return 0;
@@ -784,7 +843,7 @@ bool rst2rfcxml::in_context(xml_context context) const
 void rst2rfcxml::output_line(string line, ostream& output_stream)
 {
 	cmatch match;
-	if (regex_search(line.c_str(), match, regex("^[\\d]+. "))) {
+	if (regex_search(line.c_str(), match, regex("^[\\d]+\\. "))) {
 		if (in_context(xml_context::LIST_ELEMENT)) {
 			pop_context(output_stream);
 		}
@@ -854,6 +913,7 @@ void rst2rfcxml::output_line(string line, ostream& output_stream)
 }
 
 // Process all lines in an input stream.
+// Returns 0 on success, non-zero error code on failure.
 int rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_stream)
 {
 	string line;

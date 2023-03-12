@@ -160,14 +160,38 @@ Sample Document Title
     </tr></thead>
     <tbody>
      <tr>
-      <td>foo</td>
-      <td>1</td>
-      <td>Some note text</td>
+      <td>
+       <t>
+        foo
+       </t>
+      </td>
+      <td>
+       <t>
+        1
+       </t>
+      </td>
+      <td>
+       <t>
+        Some note text
+       </t>
+      </td>
      </tr>
      <tr>
-      <td>bar</td>
-      <td>2</td>
-      <td>Another note</td>
+      <td>
+       <t>
+        bar
+       </t>
+      </td>
+      <td>
+       <t>
+        2
+       </t>
+      </td>
+      <td>
+       <t>
+        Another note
+       </t>
+      </td>
      </tr>
     </tbody>
    </table>
