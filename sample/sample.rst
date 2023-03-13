@@ -58,6 +58,14 @@ Internal reference: `References`_
 
 External reference: `External reference text <https://example.com/path>`_.
 
+.. |ref[DRAFT].title| replace:: Sample Title
+.. |ref[DRAFT].seriesInfo.name| replace:: Internet-Draft
+.. |ref[DRAFT].seriesInfo.value| replace:: draft-thaler-bpf-isa-00
+.. |ref[DRAFT].target| replace:: instruction-set.rst
+.. |ref[DRAFT].type| replace:: informative
+
+External reference to an Internet Draft: `External reference text <instruction-set.rst>`_.
+
 Blocks
 ======
 

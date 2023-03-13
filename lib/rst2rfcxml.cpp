@@ -524,6 +524,16 @@ bool rst2rfcxml::handle_variable_initializations(string line)
 		reference.type = match.suffix().str();
 		return true;
 	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].seriesInfo.name\\| replace:: "))) {
+		reference& reference = get_reference_by_anchor(match[1]);
+		reference.seriesInfoName = match.suffix().str();
+		return true;
+	}
+	if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].seriesInfo.value\\| replace:: "))) {
+		reference& reference = get_reference_by_anchor(match[1]);
+		reference.seriesInfoValue = match.suffix().str();
+		return true;
+	}
 
 	return false;
 }
@@ -950,11 +960,19 @@ void rst2rfcxml::output_references(ostream& output_stream, string type, string t
 			target_uri = reference.target;
 		}
 
-		output_stream << fmt::format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, target_uri) << endl;
+        if (reference.seriesInfoValue.empty()) {
+            // Let the seriesInfo override the target URI in the RST.
+            output_stream << fmt::format("  <reference anchor=\"{}\" target=\"{}\">", reference.anchor, target_uri) << endl;
+        } else {
+            output_stream << fmt::format("  <reference anchor=\"{}\">", reference.anchor) << endl;
+        }
 		output_stream << "   <front>" << endl;
 		output_stream << "    <title>" << reference.title << "</title>" << endl;
 		output_stream << "    <author></author>" << endl;
 		output_stream << "   </front>" << endl;
+		if (!reference.seriesInfoName.empty() && !reference.seriesInfoValue.empty()) {
+			output_stream << fmt::format("   <seriesInfo name='{}' value='{}'/>", reference.seriesInfoName, reference.seriesInfoValue) << endl;
+		}
 		output_stream << "  </reference>" << endl;
 	}
 	if (found) {

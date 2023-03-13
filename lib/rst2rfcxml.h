@@ -55,6 +55,8 @@ struct author {
 
 struct reference {
     std::string anchor;
+    std::string seriesInfoName;
+    std::string seriesInfoValue;
     std::string title;
     std::string target;
     std::string type;

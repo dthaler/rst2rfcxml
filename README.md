@@ -164,6 +164,8 @@ portion as follows:
   is a relative reference, it is relative to the `baseTargetUri` specified above.
 * `ref[<anchor>].title`: Title to associate with the reference with the indicated `<anchor>`.
 * `ref[<anchor>].type`: Must be set to `normative` or `informative`.
+* `ref[<anchor>].seriesInfo.name`: Series info name.  Must be set to `RFC`, `Internet-Draft`, or `DOI`.
+* `ref[<anchor>].seriesInfo.value`: Series info value.  See [Section 2.47 of RFC 7991](https://www.rfc-editor.org/rfc/rfc7991#section-2.47).
 
 Example:
 
@@ -171,6 +173,8 @@ Example:
 .. |ref[SAMPLE].title| replace:: Sample Title
 .. |ref[SAMPLE].target| replace:: https://example.com/path
 .. |ref[SAMPLE].type| replace:: normative
+.. |ref[SAMPLE].seriesInfo.name| replace:: Internet-Draft
+.. |ref[SAMPLE].seriesInfo.value| replace:: draft-ietf-sample-name-00
 ```
 
 ## Sample Files

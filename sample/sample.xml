@@ -113,6 +113,9 @@ Sample Document Title
    <t>
     External reference: <xref target="SAMPLE">External reference text</xref>.
    </t>
+   <t>
+    External reference to an Internet Draft: <xref target="DRAFT">External reference text</xref>.
+   </t>
   </section>
   <section anchor="blocks" title="Blocks">
    <section anchor="code-blocks" title="Code blocks">
@@ -204,6 +207,15 @@ Sample Document Title
     <title>Sample Reference Title</title>
     <author></author>
    </front>
+  </reference>
+ </references>
+ <references><name>Informative References</name>
+  <reference anchor="DRAFT">
+   <front>
+    <title>Sample Title</title>
+    <author></author>
+   </front>
+   <seriesInfo name='Internet-Draft' value='draft-thaler-bpf-isa-00'/>
   </reference>
  </references>
  </back>
