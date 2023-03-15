@@ -66,6 +66,16 @@ $ xml2rfc --html draft-thaler-sample-00.xml
 $ firefox draft-thaler-sample-00.html
 ```
 
+However the include directive can be used instead by having a "skeleton" file that
+includes the main RST file at an appropriate point.  Thus, conversion to an Internet-Draft
+might be done as follows:
+
+```
+$ rst2rfcxml sample-skeleton.rst -o draft-thaler-sample-00.xml
+$ xml2rfc --html draft-thaler-sample-00.xml
+$ firefox draft-thaler-sample-00.html
+```
+
 The following subsections provide more details on the contents
 of RST files.
 
@@ -179,8 +189,9 @@ Example:
 
 ## Sample Files
 
-* [sample.rst](sample/sample.rst): Sample RST file to convert.
+* [sample.rst](sample/sample.rst): Sample RST file to convert, as it might appear in say the Linux kernel repository.
 * [sample-prologue.rst](sample/sample-prologue.rst): Sample prologue file that goes with sample.rst.
-* [sample.xml](sample/sample.xml): Output of running `rst2rfcxml` on sample-prologue.rst and sample.rst.
+* [sample-skeleton.rst](sample/sample-skeleton.rst): Sample skeleton file that includes sample.rst and sample-prologue.rst.
+* [sample.xml](sample/sample.xml): Output of running `rst2rfcxml` on sample-skeleton.rst.
 * [sample.txt](sample/sample.txt): Output of running `xml2rfc` on sample.xml.
 * [sample.html](sample/sample.html): Output of running `xml2rfc --html` on sample.xml. ([Browser View](https://htmlpreview.github.io/?https://raw.githubusercontent.com/dthaler/rst2rfcxml/main/sample/sample.html))

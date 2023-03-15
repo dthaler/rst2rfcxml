@@ -578,7 +578,7 @@ My abstract
         expected_output.c_str());
 }
 
-TEST_CASE("sample", "[basic]")
+TEST_CASE("sample with prologue", "[basic]")
 {
     // Find path to sample.rst.
     constexpr int MAX_DEPTH = 4;
@@ -606,7 +606,7 @@ TEST_CASE("sample", "[basic]")
     REQUIRE(actual_output == expected_output);
 }
 
-TEST_CASE("include", "[basic]")
+TEST_CASE("saple with skeleton", "[basic]")
 {
     // Find path to sample.rst.
     constexpr int MAX_DEPTH = 4;
