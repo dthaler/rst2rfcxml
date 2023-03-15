@@ -276,10 +276,13 @@ Bar   Another example
 ====  ===============
 
 )",
-        R"(<table><thead><tr>
-  <th>Name</th>
-  <th>Description</th>
- </tr></thead>
+        R"(<table>
+ <thead>
+  <tr>
+   <th>Name</th>
+   <th>Description</th>
+  </tr>
+ </thead>
  <tbody>
   <tr>
    <td>
@@ -326,10 +329,13 @@ Bar   Another example
 ====  ===============
 
 )",
-        R"(<table><thead><tr>
-  <th>Name</th>
-  <th>Description</th>
- </tr></thead>
+        R"(<table>
+ <thead>
+  <tr>
+   <th>Name</th>
+   <th>Description</th>
+  </tr>
+ </thead>
  <tbody>
   <tr>
    <td>
@@ -443,7 +449,6 @@ TEST_CASE("empty header", "[basic]")
     string expected_output = BASIC_PREAMBLE;
     expected_output += R"(
 <rfc ipr="" docName="" category="" submissionType="">
-
  <front>
  </front>
 </rfc>
@@ -456,7 +461,6 @@ TEST_CASE("common header", "[basic]")
     string expected_output = BASIC_PREAMBLE;
     expected_output += R"(
 <rfc ipr="trust200902" docName="draft-sample-test-00" category="std" submissionType="IETF">
-
  <front>
   <title abbrev="Abbreviated Title">
 My Title
@@ -521,7 +525,6 @@ TEST_CASE("postalLine header", "[basic]")
     string expected_output = BASIC_PREAMBLE;
     expected_output += R"(
 <rfc ipr="trust200902" docName="draft-sample-test-00" category="std" submissionType="IETF">
-
  <front>
   <title abbrev="Abbreviated Title">
 My Title

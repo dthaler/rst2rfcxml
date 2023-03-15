@@ -23,6 +23,31 @@
 
 using namespace std;
 
+const string xml_context::ABSTRACT = "abstract";
+const string xml_context::ARTWORK = "artwork";
+const string xml_context::BACK = "back";
+const string xml_context::BLOCKQUOTE = "blockquote";
+const string xml_context::CONSUME_BLANK_LINE = ""; // Pseudo XML context that maps to nothing.
+const string xml_context::DEFINITION_LIST = "dl";
+const string xml_context::DEFINITION_TERM = "dt";
+const string xml_context::DEFINITION_DESCRIPTION = "dd";
+const string xml_context::FRONT = "front";
+const string xml_context::LIST_ELEMENT = "li";
+const string xml_context::MIDDLE = "middle";
+const string xml_context::ORDERED_LIST = "ol";
+const string xml_context::RFC = "rfc";
+const string xml_context::SECTION = "section";
+const string xml_context::SOURCE_CODE = "sourcecode";
+const string xml_context::TABLE = "table";
+const string xml_context::TABLE_BODY = "tbody";
+const string xml_context::TABLE_BODY_ROW = "tr";
+const string xml_context::TABLE_CELL = "td";
+const string xml_context::TABLE_HEADER = "thead";
+const string xml_context::TABLE_HEADER_ROW = "tr";
+const string xml_context::TEXT = "t";
+const string xml_context::TITLE = "title";
+const string xml_context::UNORDERED_LIST = "ul";
+
 // Remove whitespace from beginning and end of string.
 static string
 _trim(string s)
@@ -88,17 +113,16 @@ rst2rfcxml::output_header(ostream& output_stream)
 
 )";
 
-    output_stream << fmt::format(
-                         "<rfc ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\">",
-                         _ipr,
-                         _document_name,
-                         _category,
-                         _submission_type)
-                  << endl
-                  << endl;
-    _contexts.push(xml_context::RFC);
-    output_stream << " <front>" << endl;
-    _contexts.push(xml_context::FRONT);
+    push_context(
+        output_stream,
+        xml_context::RFC,
+        fmt::format(
+            "ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\"",
+            _ipr,
+            _document_name,
+            _category,
+            _submission_type));
+    push_context(output_stream, xml_context::FRONT);
 }
 
 static void
@@ -150,6 +174,19 @@ rst2rfcxml::output_authors(ostream& output_stream) const
 }
 
 void
+rst2rfcxml::push_context(ostream& output_stream, string context, string attributes)
+{
+    if (context != xml_context::CONSUME_BLANK_LINE) {
+        output_stream << _spaces(_contexts.size()) << "<" << context;
+        if (!attributes.empty()) {
+            output_stream << " " << attributes;
+        }
+        output_stream << ">" << endl;
+    }
+    _contexts.push(context);
+}
+
+void
 rst2rfcxml::pop_context(ostream& output_stream)
 {
     if (_contexts.top() == xml_context::TABLE_BODY && !_table_cell_rst.empty()) {
@@ -159,78 +196,11 @@ rst2rfcxml::pop_context(ostream& output_stream)
     if (_contexts.top() != xml_context::CONSUME_BLANK_LINE) {
         output_stream << _spaces(_contexts.size() - 1);
     }
-    switch (_contexts.top()) {
-    case xml_context::ABSTRACT:
-        output_stream << "</abstract>" << endl;
-        break;
-    case xml_context::ARTWORK:
-        output_stream << "</artwork>" << endl;
-        break;
-    case xml_context::BACK:
-        output_stream << "</back>" << endl;
-        break;
-    case xml_context::BLOCKQUOTE:
-        output_stream << "</blockquote>" << endl;
-        break;
-    case xml_context::CONSUME_BLANK_LINE:
-        // Nothing to do.
-        break;
-    case xml_context::DEFINITION_DESCRIPTION:
-        output_stream << "</dd>" << endl;
-        break;
-    case xml_context::DEFINITION_LIST:
-        output_stream << "</dl>" << endl;
-        break;
-    case xml_context::DEFINITION_TERM:
-        output_stream << "</dt>" << endl;
-        break;
-    case xml_context::FRONT:
-        output_stream << "</front>" << endl;
-        break;
-    case xml_context::LIST_ELEMENT:
-        output_stream << "</li>" << endl;
-        break;
-    case xml_context::MIDDLE:
-        output_stream << "</middle>" << endl;
-        break;
-    case xml_context::ORDERED_LIST:
-        output_stream << "</ol>" << endl;
-        break;
-    case xml_context::RFC:
-        output_stream << "</rfc>" << endl;
-        break;
-    case xml_context::SECTION:
-        output_stream << "</section>" << endl;
-        break;
-    case xml_context::SOURCE_CODE:
-        output_stream << "</sourcecode>" << endl;
-        break;
-    case xml_context::TABLE:
-        output_stream << "</table>" << endl;
-        break;
-    case xml_context::TABLE_BODY:
-        output_stream << "</tbody>" << endl;
-        break;
-    case xml_context::TABLE_CELL:
-        output_stream << "</td>" << endl;
-        break;
-    case xml_context::TABLE_HEADER:
-        output_stream << "</tr></thead>" << endl;
-        break;
-    case xml_context::TABLE_ROW:
-        output_stream << "</tr>" << endl;
-        break;
-    case xml_context::TEXT:
-        output_stream << "</t>" << endl;
-        break;
-    case xml_context::TITLE:
-        output_stream << "</title>" << endl;
-        break;
-    case xml_context::UNORDERED_LIST:
-        output_stream << "</ul>" << endl;
-        break;
-    default:
-        break;
+    string top = _contexts.top();
+    if (top.empty()) {
+        // CONSUME_BLANK_LINE, nothing to do.
+    } else {
+        output_stream << "</" << top << ">" << endl;
     }
     _contexts.pop();
 }
@@ -245,7 +215,7 @@ rst2rfcxml::pop_contexts(size_t level, ostream& output_stream)
 }
 
 void
-rst2rfcxml::pop_contexts_until(xml_context end, ostream& output_stream)
+rst2rfcxml::pop_contexts_until(string end, ostream& output_stream)
 {
     while (_contexts.size() > 0 && _contexts.top() != end) {
         pop_context(output_stream);
@@ -581,14 +551,12 @@ rst2rfcxml::handle_variable_initializations(string line)
 void
 rst2rfcxml::output_table_row(ostream& output_stream)
 {
-    output_stream << _spaces(_contexts.size()) << "<tr>" << endl;
-    _contexts.push(xml_context::TABLE_ROW);
+    push_context(output_stream, xml_context::TABLE_BODY_ROW);
 
     for (int column = 0; column < _column_indices.size(); column++) {
         size_t context_level = _contexts.size();
 
-        output_stream << _spaces(_contexts.size()) << "<td>" << endl;
-        _contexts.push(xml_context::TABLE_CELL);
+        push_context(output_stream, xml_context::TABLE_CELL);
 
         string rst_content = _table_cell_rst[column];
         stringstream ss(rst_content);
@@ -613,10 +581,10 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
             _column_indices.clear();
             return true;
         }
-        if (in_context(xml_context::TABLE_HEADER)) {
+        if (in_context(xml_context::TABLE_HEADER_ROW)) {
+            pop_context(output_stream); // TABLE_HEADER_ROW
             pop_context(output_stream); // TABLE_HEADER
-            output_stream << _spaces(_contexts.size()) << "<tbody>" << endl;
-            _contexts.push(xml_context::TABLE_BODY);
+            push_context(output_stream, xml_context::TABLE_BODY);
             return true;
         }
 
@@ -624,9 +592,9 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
                in_context(xml_context::DEFINITION_LIST)) {
             pop_context(output_stream);
         }
-        output_stream << _spaces(_contexts.size()) << "<table><thead><tr>" << endl;
-        _contexts.push(xml_context::TABLE);
-        _contexts.push(xml_context::TABLE_HEADER);
+        push_context(output_stream, xml_context::TABLE);
+        push_context(output_stream, xml_context::TABLE_HEADER);
+        push_context(output_stream, xml_context::TABLE_HEADER_ROW);
 
         // Find column indices.
         size_t index = current.find_first_of("=");
@@ -642,7 +610,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
     }
 
     // Process a table header line.
-    if (in_context(xml_context::TABLE_HEADER)) {
+    if (in_context(xml_context::TABLE_HEADER_ROW)) {
         for (size_t column = 0; column < _column_indices.size(); column++) {
             size_t start = _column_indices[column];
             size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
@@ -697,14 +665,11 @@ rst2rfcxml::handle_section_title(int level, string marker, string current, strin
         pop_contexts(BASE_SECTION_LEVEL + level - 1, output_stream);
         if (in_context(xml_context::FRONT)) {
             pop_contexts(1, output_stream);
-            output_stream << " <middle>" << endl;
-            _contexts.push(xml_context::MIDDLE);
+            push_context(output_stream, xml_context::MIDDLE);
         }
         string title = handle_escapes_and_links(current);
-        output_stream << fmt::format(
-                             "{}<section anchor=\"{}\" title=\"{}\">", _spaces(_contexts.size()), _anchor(title), title)
-                      << endl;
-        _contexts.push(xml_context::SECTION);
+        push_context(
+            output_stream, xml_context::SECTION, fmt::format("anchor=\"{}\" title=\"{}\"", _anchor(title), title));
         return true;
     }
     if (current.starts_with(marker) && current.find_first_not_of(marker, 0) == string::npos &&
@@ -726,8 +691,7 @@ rst2rfcxml::handle_title_line(string current, string next, ostream& output_strea
 
         // If in front matter, this is the start of the title.
         if (in_context(xml_context::FRONT)) {
-            output_stream << fmt::format("  <title abbrev=\"{}\">", _abbreviated_title) << endl;
-            _contexts.push(xml_context::TITLE);
+            push_context(output_stream, xml_context::TITLE, fmt::format("abbrev=\"{}\"", _abbreviated_title));
             return true;
         }
 
@@ -773,9 +737,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         if (in_context(xml_context::TEXT)) {
             pop_context(output_stream);
         }
-        output_stream << _spaces(_contexts.size()) << "<sourcecode>" << endl;
-        _contexts.push(xml_context::SOURCE_CODE);
-        _contexts.push(xml_context::CONSUME_BLANK_LINE);
+        push_context(output_stream, xml_context::SOURCE_CODE);
+        push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
     if (current.starts_with(".. include:: ")) {
@@ -831,11 +794,9 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     if (next.starts_with("  ") && (next.find_first_not_of(" ") != string::npos) && !current.empty() &&
         !isspace(current[0]) && !current.starts_with("* ")) {
         if (!in_context(xml_context::DEFINITION_LIST)) {
-            output_stream << _spaces(_contexts.size()) << "<dl>" << endl;
-            _contexts.push(xml_context::DEFINITION_LIST);
+            push_context(output_stream, xml_context::DEFINITION_LIST);
         }
-        output_stream << _spaces(_contexts.size()) << "<dt>" << endl;
-        _contexts.push(xml_context::DEFINITION_TERM);
+        push_context(output_stream, xml_context::DEFINITION_TERM);
     }
 
     // Handle artwork.
@@ -863,9 +824,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
                 }
             }
             pop_contexts(context_level, output_stream);
-            output_stream << _spaces(_contexts.size()) << "<artwork>" << endl;
-            _contexts.push(xml_context::ARTWORK);
-            _contexts.push(xml_context::CONSUME_BLANK_LINE);
+            push_context(output_stream, xml_context::ARTWORK);
+            push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
             return 0;
         }
     }
@@ -881,8 +841,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
             pop_context(output_stream);
         }
 
-        output_stream << _spaces(_contexts.size()) << "<blockquote>" << endl;
-        _contexts.push(xml_context::BLOCKQUOTE);
+        push_context(output_stream, xml_context::BLOCKQUOTE);
         return 0;
     }
 
@@ -891,7 +850,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 }
 
 bool
-rst2rfcxml::in_context(xml_context context) const
+rst2rfcxml::in_context(string context) const
 {
     return (!_contexts.empty() && _contexts.top() == context);
 }
@@ -906,11 +865,9 @@ rst2rfcxml::output_line(string line, ostream& output_stream)
             pop_context(output_stream);
         }
         if (!in_context(xml_context::ORDERED_LIST)) {
-            output_stream << _spaces(_contexts.size()) << "<ol>" << endl;
-            _contexts.push(xml_context::ORDERED_LIST);
+            push_context(output_stream, xml_context::ORDERED_LIST);
         }
-        output_stream << fmt::format("{}<li>", _spaces(_contexts.size())) << endl;
-        _contexts.push(xml_context::LIST_ELEMENT);
+        push_context(output_stream, xml_context::LIST_ELEMENT);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(match.suffix()))
                       << endl;
     } else if (line.starts_with("* ")) {
@@ -918,18 +875,15 @@ rst2rfcxml::output_line(string line, ostream& output_stream)
             pop_context(output_stream);
         }
         if (!in_context(xml_context::UNORDERED_LIST)) {
-            output_stream << _spaces(_contexts.size()) << "<ul>" << endl;
-            _contexts.push(xml_context::UNORDERED_LIST);
+            push_context(output_stream, xml_context::UNORDERED_LIST);
         }
-        output_stream << fmt::format("{}<li>", _spaces(_contexts.size())) << endl;
-        _contexts.push(xml_context::LIST_ELEMENT);
+        push_context(output_stream, xml_context::LIST_ELEMENT);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2)))
                       << endl;
     } else if (line.find_first_not_of(" ") != string::npos) {
         if (in_context(xml_context::DEFINITION_TERM) && line.starts_with("  ")) {
             pop_context(output_stream);
-            output_stream << _spaces(_contexts.size()) << "<dd>" << endl;
-            _contexts.push(xml_context::DEFINITION_DESCRIPTION);
+            push_context(output_stream, xml_context::DEFINITION_DESCRIPTION);
         } else if (
             !in_context(xml_context::BLOCKQUOTE) && !in_context(xml_context::CONSUME_BLANK_LINE) &&
             !in_context(xml_context::DEFINITION_DESCRIPTION) && !in_context(xml_context::DEFINITION_TERM) &&
@@ -937,14 +891,12 @@ rst2rfcxml::output_line(string line, ostream& output_stream)
             !in_context(xml_context::TEXT)) {
             if (in_context(xml_context::FRONT)) {
                 output_authors(output_stream);
-                output_stream << "  <abstract>" << endl;
-                _contexts.push(xml_context::ABSTRACT);
+                push_context(output_stream, xml_context::ABSTRACT);
             }
             if (in_context(xml_context::DEFINITION_LIST)) {
                 pop_context(output_stream);
             }
-            output_stream << _spaces(_contexts.size()) << "<t>" << endl;
-            _contexts.push(xml_context::TEXT);
+            push_context(output_stream, xml_context::TEXT);
         }
         output_stream << _spaces(_contexts.size()) << handle_escapes_and_links(line) << endl;
     }
@@ -1033,8 +985,7 @@ rst2rfcxml::output_references(ostream& output_stream, string type, string title)
 void
 rst2rfcxml::output_back(ostream& output_stream)
 {
-    output_stream << " <back>" << endl;
-    _contexts.push(xml_context::BACK);
+    push_context(output_stream, xml_context::BACK);
     output_references(output_stream, "normative", "Normative References");
     output_references(output_stream, "informative", "Informative References");
 }

@@ -7,31 +7,34 @@
 #include <map>
 #include <stack>
 
-enum class xml_context
+class xml_context
 {
-    ABSTRACT,
-    ARTWORK,
-    BACK,
-    BLOCKQUOTE,
-    CONSUME_BLANK_LINE, // Pseudo XML context that maps to nothing.
-    DEFINITION_LIST,
-    DEFINITION_TERM,
-    DEFINITION_DESCRIPTION,
-    FRONT,
-    LIST_ELEMENT,
-    MIDDLE,
-    ORDERED_LIST,
-    RFC,
-    SECTION,
-    SOURCE_CODE,
-    TABLE,
-    TABLE_BODY,
-    TABLE_CELL,
-    TABLE_HEADER,
-    TABLE_ROW,
-    TEXT,
-    TITLE,
-    UNORDERED_LIST,
+  public:
+    static const std::string ABSTRACT;
+    static const std::string ARTWORK;
+    static const std::string BACK;
+    static const std::string BLOCKQUOTE;
+    static const std::string CONSUME_BLANK_LINE; // Pseudo XML context that maps to nothing.
+    static const std::string DEFINITION_LIST;
+    static const std::string DEFINITION_TERM;
+    static const std::string DEFINITION_DESCRIPTION;
+    static const std::string FRONT;
+    static const std::string LIST_ELEMENT;
+    static const std::string MIDDLE;
+    static const std::string ORDERED_LIST;
+    static const std::string RFC;
+    static const std::string SECTION;
+    static const std::string SOURCE_CODE;
+    static const std::string TABLE;
+    static const std::string TABLE_BODY;
+    static const std::string TABLE_BODY_ROW;
+    static const std::string TABLE_CELL;
+    static const std::string TABLE_HEADER;
+    static const std::string TABLE_HEADER_ROW;
+    static const std::string TEXT;
+    static const std::string TITLE;
+    static const std::string UNORDERED_LIST;
+    std::string value;
 };
 
 struct author
@@ -77,6 +80,8 @@ class rst2rfcxml
     process_input_stream(std::istream& input_stream, std::ostream& output_stream);
     void
     pop_contexts(size_t level, std::ostream& output_stream);
+    void
+    push_context(std::ostream& output_stream, std::string context, std::string attributes = "");
 
   private:
     author&
@@ -98,11 +103,11 @@ class rst2rfcxml
     void
     pop_context(std::ostream& output_stream);
     void
-    pop_contexts_until(xml_context end, std::ostream& output_stream);
+    pop_contexts_until(std::string end, std::ostream& output_stream);
     int
     process_line(std::string current, std::string next, std::ostream& output_stream);
     bool
-    in_context(xml_context context) const;
+    in_context(std::string context) const;
     bool
     handle_variable_initializations(std::string line);
     bool
@@ -127,7 +132,7 @@ class rst2rfcxml
     std::map<std::string, author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;
-    std::stack<xml_context> _contexts;
+    std::stack<std::string> _contexts;
     std::map<std::string, std::string> _rst_references;
     std::map<std::string, reference> _xml_references;
 
