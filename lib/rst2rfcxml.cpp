@@ -5,7 +5,17 @@
 #include "rst2rfcxml.h"
 
 #define FMT_HEADER_ONLY
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 6285)  // (non-zero-constant || non-zero-constant) is always a non-zero constant.
+#pragma warning(disable : 26450) // '*' operation causes overflow at compile time.
+#pragma warning(disable : 26451) // Using operator '+' on a 4 byte value and then casting the result to a 8 byte value.
+#pragma warning(disable : 26498) // Mark variable constexpr if compile-time evaluation is desired.
+#endif
 #include <fmt/format.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <fstream>
 #include <regex>
 #include <sstream>
@@ -128,7 +138,7 @@ rst2rfcxml::output_authors(ostream& output_stream) const
         _output_optional_text_element(output_stream, "country", author.country);
         _output_optional_text_element(output_stream, "region", author.region);
         _output_optional_text_element(output_stream, "street", author.street);
-        for (auto postalLine : author.postalLine) {
+        for (auto& postalLine : author.postalLine) {
             _output_optional_text_element(output_stream, "postalLine", postalLine);
         }
         output_stream << "    </postal>" << endl;
@@ -390,7 +400,7 @@ rst2rfcxml::handle_escapes_and_links(string line)
     return line;
 }
 
-constexpr int BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
+constexpr size_t BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
 
 static bool
 _handle_variable_initialization(string line, string label, string& field)
@@ -633,7 +643,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
 
     // Process a table header line.
     if (in_context(xml_context::TABLE_HEADER)) {
-        for (int column = 0; column < _column_indices.size(); column++) {
+        for (size_t column = 0; column < _column_indices.size(); column++) {
             size_t start = _column_indices[column];
             size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
             if (current.length() > start) {
@@ -657,7 +667,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
         }
 
         // Queue line segments to table cells.
-        for (int column = 0; column < _column_indices.size(); column++) {
+        for (size_t column = 0; column < _column_indices.size(); column++) {
             size_t start = _column_indices[column];
             size_t count = (column + 1 < _column_indices.size()) ? _column_indices[column + 1] - start : -1;
             string value;
@@ -1054,7 +1064,7 @@ rst2rfcxml::process_file(filesystem::path input_filename, ostream& output_stream
 int
 rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {
-    for (auto input_filename : input_filenames) {
+    for (auto& input_filename : input_filenames) {
         int error = process_file(input_filename, output_stream);
         if (error) {
             return error;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <filesystem>
 #include <iostream>
 #include <map>
 #include <stack>
@@ -62,7 +63,7 @@ struct reference
     std::string title;
     std::string target;
     std::string type;
-    int use_count;
+    int use_count = 0;
 };
 
 class rst2rfcxml
