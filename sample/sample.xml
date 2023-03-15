@@ -17,7 +17,6 @@
 <?rfc docmapping="yes"?>
 
 <rfc ipr="trust200902" docName="draft-thaler-sample-00" category="std" submissionType="IETF">
-
  <front>
   <title abbrev="Sample Abbreviated Title">
 Sample Document Title
@@ -156,11 +155,14 @@ Sample Document Title
    </section>
   </section>
   <section anchor="tables" title="Tables">
-   <table><thead><tr>
-     <th>name</th>
-     <th>value</th>
-     <th>notes</th>
-    </tr></thead>
+   <table>
+    <thead>
+     <tr>
+      <th>name</th>
+      <th>value</th>
+      <th>notes</th>
+     </tr>
+    </thead>
     <tbody>
      <tr>
       <td>
