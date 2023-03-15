@@ -1,14 +1,16 @@
 // Copyright (c) Dave Thaler
 // SPDX-License-Identifier: MIT
-#include <filesystem>
-#include <fstream>
-#include <sstream>
 #include "catch.hpp"
 #include "rst2rfcxml.h"
 
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+
 using namespace std;
 
-void test_rst2rfcxml(const char* input, const char* expected_output)
+void
+test_rst2rfcxml(const char* input, const char* expected_output)
 {
     rst2rfcxml rst2rfcxml;
     istringstream is(input);
@@ -38,10 +40,12 @@ TEST_CASE("references", "[basic]")
 {
     test_rst2rfcxml("`Foo bar`_", "<t>\n <xref target=\"foo-bar\">Foo bar</xref>\n</t>\n");
 
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 .. |ref[SAMPLE].target| replace:: https://example.com/target
     `Sample reference <https://example.com/target>`_
-)", "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
+)",
+        "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
 }
 
 TEST_CASE("titles", "[basic]")
@@ -53,7 +57,8 @@ TEST_CASE("titles", "[basic]")
 
 TEST_CASE("code block", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 .. code-block::
 
    foo
@@ -61,7 +66,8 @@ TEST_CASE("code block", "[basic]")
    z = (2 * x < y) + (3 * (a & b) > c)
 
 done
-)", R"(<sourcecode>
+)",
+        R"(<sourcecode>
    foo
       bar
    z = (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
@@ -74,7 +80,8 @@ done
 
 TEST_CASE("artwork", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 Paragraph:
 
 ::
@@ -84,7 +91,8 @@ Paragraph:
   (2 * x < y) + (3 * (a & b) > c)
 
 done
-)", R"(<t>
+)",
+        R"(<t>
  Paragraph:
 </t>
 <artwork>
@@ -97,14 +105,16 @@ done
 </t>
 )");
 
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 Paragraph: ::
 
   Literal block
      of text
 
 done
-)", R"(<t>
+)",
+        R"(<t>
  Paragraph:
 </t>
 <artwork>
@@ -116,14 +126,16 @@ done
 </t>
 )");
 
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 Paragraph::
 
   Literal block
      of text
 
 done
-)", R"(<t>
+)",
+        R"(<t>
  Paragraph:
 </t>
 <artwork>
@@ -138,12 +150,14 @@ done
 
 TEST_CASE("block quote", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 
   This is indented.
 
 done
-)", R"(<blockquote>
+)",
+        R"(<blockquote>
  This is indented.
 </blockquote>
 <t>
@@ -154,7 +168,8 @@ done
 
 TEST_CASE("definition list", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 foo
   description
 
@@ -162,7 +177,8 @@ bar
   description
 
 baz
-)", R"(<dl>
+)",
+        R"(<dl>
  <dt>
   foo
  </dt>
@@ -184,7 +200,8 @@ baz
 
 TEST_CASE("bold definition list", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 **foo**
   description
 
@@ -192,7 +209,8 @@ TEST_CASE("bold definition list", "[basic]")
   description
 
 baz
-)", R"(<dl>
+)",
+        R"(<dl>
  <dt>
   <strong>foo</strong>
  </dt>
@@ -214,7 +232,8 @@ baz
 
 TEST_CASE("italic definition list", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 *foo*
   description
 
@@ -222,7 +241,8 @@ TEST_CASE("italic definition list", "[basic]")
   description
 
 baz
-)", R"(<dl>
+)",
+        R"(<dl>
  <dt>
   <em>foo</em>
  </dt>
@@ -244,7 +264,8 @@ baz
 
 TEST_CASE("table", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 
 ====  ===============
 Name  Description
@@ -254,7 +275,8 @@ Bar   Another example
       Second line
 ====  ===============
 
-)", R"(<table><thead><tr>
+)",
+        R"(<table><thead><tr>
   <th>Name</th>
   <th>Description</th>
  </tr></thead>
@@ -291,7 +313,8 @@ Bar   Another example
 
 TEST_CASE("table with literal cell", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 
 ====  ===============
 Name  Description
@@ -302,7 +325,8 @@ Foo   Example::
 Bar   Another example
 ====  ===============
 
-)", R"(<table><thead><tr>
+)",
+        R"(<table><thead><tr>
   <th>Name</th>
   <th>Description</th>
  </tr></thead>
@@ -341,10 +365,12 @@ Bar   Another example
 
 TEST_CASE("unordered list", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 * One
 * Two
-)", R"(<ul>
+)",
+        R"(<ul>
  <li>
   One
  </li>
@@ -357,11 +383,13 @@ TEST_CASE("unordered list", "[basic]")
 
 TEST_CASE("unordered list extended", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 * One
 * Two with a continuation
   of the same line.
-)", R"(<ul>
+)",
+        R"(<ul>
  <li>
   One
  </li>
@@ -375,10 +403,12 @@ TEST_CASE("unordered list extended", "[basic]")
 
 TEST_CASE("ordered list", "[basic]")
 {
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 1. One
 2. Two
-)", R"(<ol>
+)",
+        R"(<ol>
  <li>
   One
  </li>
@@ -453,7 +483,8 @@ My Title
  </front>
 </rfc>
 )";
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 .. |docName| replace:: draft-sample-test-00
 .. |ipr| replace:: trust200902
 .. |category| replace:: std
@@ -481,7 +512,8 @@ My Title
 ========
 
 My abstract
-)", expected_output.c_str());
+)",
+        expected_output.c_str());
 }
 
 TEST_CASE("postalLine header", "[basic]")
@@ -513,7 +545,8 @@ My Title
  </front>
 </rfc>
 )";
-    test_rst2rfcxml(R"(
+    test_rst2rfcxml(
+        R"(
 .. |docName| replace:: draft-sample-test-00
 .. |ipr| replace:: trust200902
 .. |category| replace:: std
@@ -538,7 +571,8 @@ My Title
 ========
 
 My abstract
-)", expected_output.c_str());
+)",
+        expected_output.c_str());
 }
 
 TEST_CASE("sample", "[basic]")
@@ -554,7 +588,7 @@ TEST_CASE("sample", "[basic]")
     path += "/sample/";
 
     // Process sample input files.
-    vector<string> input_filenames = { path.string() + "sample-prologue.rst", path.string() + "sample.rst"};
+    vector<string> input_filenames = {path.string() + "sample-prologue.rst", path.string() + "sample.rst"};
     rst2rfcxml rst2rfcxml;
     ostringstream os;
     REQUIRE(rst2rfcxml.process_files(input_filenames, os) == 0);
@@ -563,7 +597,8 @@ TEST_CASE("sample", "[basic]")
 
     // Get the expected output.
     ifstream expected_output_file(path.string() + "sample.xml");
-    std::string expected_output((std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
+    std::string expected_output(
+        (std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
 
     REQUIRE(actual_output == expected_output);
 }
@@ -581,7 +616,7 @@ TEST_CASE("include", "[basic]")
     path += "/sample/";
 
     // Process sample input files.
-    vector<string> input_filenames = { path.string() + "sample-skeleton.rst" };
+    vector<string> input_filenames = {path.string() + "sample-skeleton.rst"};
     rst2rfcxml rst2rfcxml;
     ostringstream os;
     REQUIRE(rst2rfcxml.process_files(input_filenames, os) == 0);
@@ -590,7 +625,8 @@ TEST_CASE("include", "[basic]")
 
     // Get the expected output.
     ifstream expected_output_file(path.string() + "sample.xml");
-    std::string expected_output((std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
+    std::string expected_output(
+        (std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
 
     REQUIRE(actual_output == expected_output);
 }

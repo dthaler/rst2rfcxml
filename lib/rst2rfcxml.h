@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <filesystem>
 #include <iostream>
 #include <map>
-
 #include <stack>
 
-enum class xml_context {
+enum class xml_context
+{
     ABSTRACT,
     ARTWORK,
     BACK,
@@ -33,7 +34,8 @@ enum class xml_context {
     UNORDERED_LIST,
 };
 
-struct author {
+struct author
+{
     std::string anchor;
     std::string initials;
     std::string asciiInitials;
@@ -53,43 +55,69 @@ struct author {
     std::vector<std::string> postalLine;
 };
 
-struct reference {
+struct reference
+{
     std::string anchor;
     std::string seriesInfoName;
     std::string seriesInfoValue;
     std::string title;
     std::string target;
     std::string type;
-    int use_count;
+    int use_count = 0;
 };
 
-class rst2rfcxml {
-public:
-    int process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
-    int process_file(std::filesystem::path input_filename, std::ostream& output_stream);
-    int process_input_stream(std::istream& input_stream, std::ostream& output_stream);
-    void pop_contexts(size_t level, std::ostream& output_stream);
+class rst2rfcxml
+{
+  public:
+    int
+    process_files(std::vector<std::string> input_filenames, std::ostream& output_stream);
+    int
+    process_file(std::filesystem::path input_filename, std::ostream& output_stream);
+    int
+    process_input_stream(std::istream& input_stream, std::ostream& output_stream);
+    void
+    pop_contexts(size_t level, std::ostream& output_stream);
 
-private:
-    author& get_author_by_anchor(std::string anchor);
-    reference& get_reference_by_anchor(std::string anchor);
-    reference* get_reference_by_target(std::string target);
-    void output_line(std::string line, std::ostream& output_stream);
-    void output_header(std::ostream& output_stream);
-    void output_back(std::ostream& output_stream);
-    void output_references(std::ostream& output_stream, std::string type, std::string title);
-    void output_authors(std::ostream& output_stream) const;
-    void pop_context(std::ostream& output_stream);
-    void pop_contexts_until(xml_context end, std::ostream& output_stream);
-    int process_line(std::string current, std::string next, std::ostream& output_stream);
-    bool in_context(xml_context context) const;
-    bool handle_variable_initializations(std::string line);
-    bool handle_table_line(std::string current, std::string next, std::ostream& output_stream);
-    bool handle_title_line(std::string current, std::string next, std::ostream& output_stream);
-    bool handle_section_title(int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
-    std::string replace_links(std::string line);
-    std::string handle_escapes_and_links(std::string line);
-    void output_table_row(std::ostream& output_stream);
+  private:
+    author&
+    get_author_by_anchor(std::string anchor);
+    reference&
+    get_reference_by_anchor(std::string anchor);
+    reference*
+    get_reference_by_target(std::string target);
+    void
+    output_line(std::string line, std::ostream& output_stream);
+    void
+    output_header(std::ostream& output_stream);
+    void
+    output_back(std::ostream& output_stream);
+    void
+    output_references(std::ostream& output_stream, std::string type, std::string title);
+    void
+    output_authors(std::ostream& output_stream) const;
+    void
+    pop_context(std::ostream& output_stream);
+    void
+    pop_contexts_until(xml_context end, std::ostream& output_stream);
+    int
+    process_line(std::string current, std::string next, std::ostream& output_stream);
+    bool
+    in_context(xml_context context) const;
+    bool
+    handle_variable_initializations(std::string line);
+    bool
+    handle_table_line(std::string current, std::string next, std::ostream& output_stream);
+    bool
+    handle_title_line(std::string current, std::string next, std::ostream& output_stream);
+    bool
+    handle_section_title(
+        int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
+    std::string
+    replace_links(std::string line);
+    std::string
+    handle_escapes_and_links(std::string line);
+    void
+    output_table_row(std::ostream& output_stream);
 
     std::string _document_name;
     std::string _base_target_uri;

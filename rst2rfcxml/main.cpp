@@ -8,9 +8,10 @@
 
 using namespace std;
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
-    CLI::App app{ "A reStructured Text to xml2rfc Version 3 converter" };
+    CLI::App app{"A reStructured Text to xml2rfc Version 3 converter"};
     app.set_version_flag("--version", std::string(VERSION));
     string output_filename;
     app.add_option("-o", output_filename, "Output filename");
