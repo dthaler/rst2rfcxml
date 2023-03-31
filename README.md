@@ -50,6 +50,7 @@ Positionals:
 
   Options:
   -h,--help                   Print this help message and exit
+  --version                   Display program version information and exit
   -o TEXT                     Output filename
   -i TEXT ... REQUIRED        Input filenames
 ```
