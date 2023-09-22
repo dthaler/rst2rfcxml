@@ -604,6 +604,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
 
         // Find column indices.
         size_t index = current.find_first_of("=");
+        _column_indices.clear();
         while (index != string::npos) {
             _column_indices.push_back(index);
             index = current.find_first_not_of("=", index);
