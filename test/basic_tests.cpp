@@ -198,6 +198,40 @@ baz
 )");
 }
 
+TEST_CASE("definition list with glossary label", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+.. glossary::
+
+    foo
+      description
+
+    bar
+      description
+
+    baz
+)",
+        R"(<dl>
+ <dt>
+  foo
+ </dt>
+ <dd>
+  description
+ </dd>
+ <dt>
+  bar
+ </dt>
+ <dd>
+  description
+ </dd>
+</dl>
+<t>
+ baz
+</t>
+)");
+}
+
 TEST_CASE("bold definition list", "[basic]")
 {
     test_rst2rfcxml(
