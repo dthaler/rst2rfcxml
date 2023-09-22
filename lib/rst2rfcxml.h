@@ -21,6 +21,7 @@ class xml_context
     static const std::string FRONT;
     static const std::string LIST_ELEMENT;
     static const std::string MIDDLE;
+    static const std::string NAME;
     static const std::string ORDERED_LIST;
     static const std::string RFC;
     static const std::string SECTION;

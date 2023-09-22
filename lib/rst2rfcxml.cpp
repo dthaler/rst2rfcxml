@@ -34,6 +34,7 @@ const string xml_context::DEFINITION_DESCRIPTION = "dd";
 const string xml_context::FRONT = "front";
 const string xml_context::LIST_ELEMENT = "li";
 const string xml_context::MIDDLE = "middle";
+const string xml_context::NAME = "name";
 const string xml_context::ORDERED_LIST = "ol";
 const string xml_context::RFC = "rfc";
 const string xml_context::SECTION = "section";
@@ -592,7 +593,12 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
                in_context(xml_context::DEFINITION_LIST)) {
             pop_context(output_stream);
         }
-        push_context(output_stream, xml_context::TABLE);
+
+        // We might already be in a TABLE context if we just processed a ".. table::" directive.
+        // Otherwise, enter a TABLE context now.
+        if (!in_context(xml_context::TABLE)) {
+            push_context(output_stream, xml_context::TABLE);
+        }
         push_context(output_stream, xml_context::TABLE_HEADER);
         push_context(output_stream, xml_context::TABLE_HEADER_ROW);
 
@@ -738,6 +744,13 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
             pop_context(output_stream);
         }
         push_context(output_stream, xml_context::SOURCE_CODE);
+        push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
+        return 0;
+    }
+    if (current.starts_with(".. table:: ")) {
+        push_context(output_stream, xml_context::TABLE);
+        string name = handle_escapes_and_links(current.substr(11));
+        output_stream << fmt::format("{}<name>{}</name>", _spaces(_contexts.size()), name) << endl;
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }

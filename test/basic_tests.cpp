@@ -369,6 +369,61 @@ Bar   Another example
 )");
 }
 
+TEST_CASE("table with caption", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+
+.. table:: Caption.
+
+  ====  ===============
+  Name  Description
+  ====  ===============
+  Foo   Example
+  Bar   Another example
+        Second line
+  ====  ===============
+
+)",
+        R"(<table>
+ <name>Caption.</name>
+ <thead>
+  <tr>
+   <th>Name</th>
+   <th>Description</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>
+    <t>
+     Foo
+    </t>
+   </td>
+   <td>
+    <t>
+     Example
+    </t>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <t>
+     Bar
+    </t>
+   </td>
+   <td>
+    <t>
+     Another example
+     Second line
+    </t>
+   </td>
+  </tr>
+ </tbody>
+</table>
+)");
+}
+
 TEST_CASE("unordered list", "[basic]")
 {
     test_rst2rfcxml(
@@ -606,7 +661,7 @@ TEST_CASE("sample with prologue", "[basic]")
     REQUIRE(actual_output == expected_output);
 }
 
-TEST_CASE("saple with skeleton", "[basic]")
+TEST_CASE("sample with skeleton", "[basic]")
 {
     // Find path to sample.rst.
     constexpr int MAX_DEPTH = 4;
