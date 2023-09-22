@@ -747,6 +747,11 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
+    if (current == ".. glossary::") {
+        push_context(output_stream, xml_context::DEFINITION_LIST);
+        push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
+        return 0;
+    }
     if (current.starts_with(".. table:: ")) {
         push_context(output_stream, xml_context::TABLE);
         string name = handle_escapes_and_links(current.substr(11));
@@ -804,8 +809,11 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     }
 
     // Handle definition lists.
-    if (next.starts_with("  ") && (next.find_first_not_of(" ") != string::npos) && !current.empty() &&
-        !isspace(current[0]) && !current.starts_with("* ")) {
+    size_t current_indentation = current.find_first_not_of(" ");
+    size_t next_indentation = next.find_first_not_of(" ");
+    if ((current_indentation != string::npos) && (next_indentation != string::npos) &&
+        (next_indentation > current_indentation) &&
+        (current.substr(current_indentation, 2) != "* ")) {
         if (!in_context(xml_context::DEFINITION_LIST)) {
             push_context(output_stream, xml_context::DEFINITION_LIST);
         }
@@ -847,7 +855,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     // Blank lines are required before and after a block quote, but these blank lines are not included as part of the
     // block quote.
     if (next.starts_with("  ") && (next.find_first_not_of(" =") != string::npos) && current.empty() &&
-        !in_context(xml_context::SOURCE_CODE) && !in_context(xml_context::ARTWORK)) {
+        !in_context(xml_context::SOURCE_CODE) && !in_context(xml_context::ARTWORK) &&
+        !in_context(xml_context::DEFINITION_DESCRIPTION)) {
         // Pop contexts until SECTION or TABLE_CELL.
         while ((_contexts.size() > 0) && (_contexts.top() != xml_context::SECTION) &&
                (_contexts.top() != xml_context::TABLE_CELL)) {
@@ -859,6 +868,13 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     }
 
     output_line(current, output_stream);
+
+    // Handle any transitions between current and next.
+    if ((current_indentation != string::npos) && (next_indentation != string::npos) &&
+        (next_indentation > current_indentation) && in_context(xml_context::DEFINITION_TERM)) {
+        pop_context(output_stream);
+        push_context(output_stream, xml_context::DEFINITION_DESCRIPTION);
+    }
     return 0;
 }
 
@@ -894,11 +910,7 @@ rst2rfcxml::output_line(string line, ostream& output_stream)
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2)))
                       << endl;
     } else if (line.find_first_not_of(" ") != string::npos) {
-        if (in_context(xml_context::DEFINITION_TERM) && line.starts_with("  ")) {
-            pop_context(output_stream);
-            push_context(output_stream, xml_context::DEFINITION_DESCRIPTION);
-        } else if (
-            !in_context(xml_context::BLOCKQUOTE) && !in_context(xml_context::CONSUME_BLANK_LINE) &&
+        if (!in_context(xml_context::BLOCKQUOTE) && !in_context(xml_context::CONSUME_BLANK_LINE) &&
             !in_context(xml_context::DEFINITION_DESCRIPTION) && !in_context(xml_context::DEFINITION_TERM) &&
             !in_context(xml_context::LIST_ELEMENT) && !in_context(xml_context::SOURCE_CODE) &&
             !in_context(xml_context::TEXT)) {
