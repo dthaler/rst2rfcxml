@@ -12,6 +12,7 @@ class xml_context
   public:
     static const std::string ABSTRACT;
     static const std::string ARTWORK;
+    static const std::string ASIDE;
     static const std::string BACK;
     static const std::string BLOCKQUOTE;
     static const std::string CONSUME_BLANK_LINE; // Pseudo XML context that maps to nothing.
