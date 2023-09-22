@@ -148,6 +148,28 @@ done
 )");
 }
 
+TEST_CASE("aside", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+.. admonition:: Example
+
+  This is an example.
+
+Done with admonition.
+)",
+        R"(<aside>
+ <t>
+  <strong>Example</strong>
+  This is an example.
+ </t>
+</aside>
+<t>
+ Done with admonition.
+</t>
+)");
+}
+
 TEST_CASE("block quote", "[basic]")
 {
     test_rst2rfcxml(

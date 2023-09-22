@@ -25,6 +25,7 @@ using namespace std;
 
 const string xml_context::ABSTRACT = "abstract";
 const string xml_context::ARTWORK = "artwork";
+const string xml_context::ASIDE = "aside";
 const string xml_context::BACK = "back";
 const string xml_context::BLOCKQUOTE = "blockquote";
 const string xml_context::CONSUME_BLANK_LINE = ""; // Pseudo XML context that maps to nothing.
@@ -753,6 +754,14 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
+    if (current.starts_with(".. admonition:: ")) {
+        push_context(output_stream, xml_context::ASIDE);
+        push_context(output_stream, xml_context::TEXT);
+        string name = handle_escapes_and_links(current.substr(16));
+        output_stream << fmt::format("{}<strong>{}</strong>", _spaces(_contexts.size()), name) << endl;
+        push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
+        return 0;
+    }
     if (current.starts_with(".. table:: ")) {
         push_context(output_stream, xml_context::TABLE);
         string name = handle_escapes_and_links(current.substr(11));
@@ -771,7 +780,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 
     // Close any contexts that end at an unindented line.
     if (!current.empty() && !isspace(current[0])) {
-        if (in_context(xml_context::SOURCE_CODE)) {
+        if (in_context(xml_context::SOURCE_CODE) || in_context(xml_context::ASIDE)) {
             pop_context(output_stream);
         }
     }
