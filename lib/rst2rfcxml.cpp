@@ -755,10 +755,14 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         return 0;
     }
     if (current.starts_with(".. admonition:: ")) {
+        // Pop contexts until SECTION.
+        while ((_contexts.size() > 0) && (_contexts.top() != xml_context::SECTION)) {
+            pop_context(output_stream);
+        }
+
         push_context(output_stream, xml_context::ASIDE);
-        push_context(output_stream, xml_context::TEXT);
         string name = handle_escapes_and_links(current.substr(16));
-        output_stream << fmt::format("{}<strong>{}</strong>", _spaces(_contexts.size()), name) << endl;
+        output_stream << fmt::format("{}<t><strong>{}</strong></t>", _spaces(_contexts.size()), name) << endl;
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
@@ -899,7 +903,8 @@ void
 rst2rfcxml::output_line(string line, ostream& output_stream)
 {
     cmatch match;
-    if (regex_search(line.c_str(), match, regex("^[\\d]+\\. "))) {
+    if (regex_search(line.c_str(), match, regex("^[\\d]+\\. ")) ||
+        regex_search(line.c_str(), match, regex("^#. "))) {
         if (in_context(xml_context::LIST_ELEMENT)) {
             pop_context(output_stream);
         }

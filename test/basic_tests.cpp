@@ -159,8 +159,8 @@ TEST_CASE("aside", "[basic]")
 Done with admonition.
 )",
         R"(<aside>
+ <t><strong>Example</strong></t>
  <t>
-  <strong>Example</strong>
   This is an example.
  </t>
 </aside>
@@ -524,6 +524,24 @@ TEST_CASE("ordered list", "[basic]")
         R"(
 1. One
 2. Two
+)",
+        R"(<ol>
+ <li>
+  One
+ </li>
+ <li>
+  Two
+ </li>
+</ol>
+)");
+}
+
+TEST_CASE("ordered list with hash", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+#. One
+#. Two
 )",
         R"(<ol>
  <li>
