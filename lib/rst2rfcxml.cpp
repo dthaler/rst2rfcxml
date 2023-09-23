@@ -268,7 +268,34 @@ _replace_all(string line, string from, string to)
 }
 
 string
-rst2rfcxml::replace_links(string line)
+rst2rfcxml::replace_term_links(string line)
+{
+    size_t start;
+    while ((start = line.find(":term:`")) != string::npos) {
+        size_t end = line.find("`", start + 7);
+        if (end == string::npos) {
+            break;
+        }
+        string before = line.substr(0, start);
+        string middle = line.substr(start + 7, end - start - 7);
+        string after = line.substr(end + 1);
+        string term = middle;
+        string label = term;
+
+        size_t term_end = middle.find("&gt;");
+        if (term_end != string::npos) {
+            size_t label_end = middle.find("&lt;");
+            label = _trim(middle.substr(0, label_end));
+            term = middle.substr(label_end + 4, term_end - label_end - 4);
+        }
+
+        line = fmt::format("{}<xref target=\"term-{}\">{}</xref>{}", before, _anchor(term), label, after);
+    }
+    return line;
+}
+
+string
+rst2rfcxml::replace_reference_links(string line)
 {
     size_t start;
     while ((start = line.find("`")) != string::npos) {
@@ -368,7 +395,8 @@ rst2rfcxml::handle_escapes_and_links(string line)
     line = _handle_escapes(line);
 
     // Replace links after handling escapes so we don't escape the <> in links.
-    line = replace_links(line);
+    line = replace_reference_links(line);
+    line = replace_term_links(line);
 
     return line;
 }
@@ -842,7 +870,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         if (!in_context(xml_context::DEFINITION_LIST)) {
             push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation);
+        string attributes = fmt::format("anchor=\"term-{}\"", _anchor(_trim(current)));
+        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation, attributes);
     }
 
     // Handle artwork.

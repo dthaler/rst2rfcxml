@@ -75,7 +75,7 @@ Sample Document Title
      The following is a definition list:
     </t>
     <dl>
-     <dt>
+     <dt anchor="term-first">
       first
      </dt>
      <dd>
@@ -83,7 +83,7 @@ Sample Document Title
        Description of the term.
       </t>
      </dd>
-     <dt>
+     <dt anchor="term-second">
       second
      </dt>
      <dd>
@@ -131,7 +131,7 @@ Sample Document Title
     } sample_t;
     </sourcecode>
     <dl>
-     <dt>
+     <dt anchor="term-sample">
       sample
      </dt>
      <dd>
