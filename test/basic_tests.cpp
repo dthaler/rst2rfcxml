@@ -204,10 +204,10 @@ foo
 bar
   description
 
-baz
+baz :term:`foo-ish<foo>` baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   foo
  </dt>
  <dd>
@@ -215,7 +215,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   bar
  </dt>
  <dd>
@@ -225,7 +225,7 @@ baz
  </dd>
 </dl>
 <t>
- baz
+ baz <xref target="term-foo">foo-ish</xref> baz
 </t>
 )");
 }
@@ -245,7 +245,7 @@ TEST_CASE("definition list with glossary label", "[basic]")
 done
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   foo
  </dt>
  <dd>
@@ -253,7 +253,7 @@ done
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   bar
  </dt>
  <dd>
@@ -281,7 +281,7 @@ TEST_CASE("bold definition list", "[basic]")
 baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   <strong>foo</strong>
  </dt>
  <dd>
@@ -289,7 +289,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   <strong>bar</strong>
  </dt>
  <dd>
@@ -317,7 +317,7 @@ TEST_CASE("italic definition list", "[basic]")
 baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   <em>foo</em>
  </dt>
  <dd>
@@ -325,7 +325,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   <em>bar</em>
  </dt>
  <dd>

@@ -842,7 +842,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         if (!in_context(xml_context::DEFINITION_LIST)) {
             push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation);
+        string attributes = fmt::format("anchor=\"term-{}\"", _anchor(current));
+        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation, attributes);
     }
 
     // Handle artwork.
