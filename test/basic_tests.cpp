@@ -43,7 +43,7 @@ TEST_CASE("references", "[basic]")
     test_rst2rfcxml(
         R"(
 .. |ref[SAMPLE].target| replace:: https://example.com/target
-    `Sample reference <https://example.com/target>`_
+`Sample reference <https://example.com/target>`_
 )",
         "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
 }
@@ -174,13 +174,19 @@ TEST_CASE("block quote", "[basic]")
 {
     test_rst2rfcxml(
         R"(
+Following is a block quote:
 
-  This is indented.
+  This is quoted text
+  that goes in a block quote.
 
 done
 )",
-        R"(<blockquote>
- This is indented.
+        R"(<t>
+ Following is a block quote:
+</t>
+<blockquote>
+ This is quoted text
+ that goes in a block quote.
 </blockquote>
 <t>
  done
@@ -232,7 +238,7 @@ TEST_CASE("definition list with glossary label", "[basic]")
     bar
       description
 
-    baz
+done
 )",
         R"(<dl>
  <dt>
@@ -249,7 +255,7 @@ TEST_CASE("definition list with glossary label", "[basic]")
  </dd>
 </dl>
 <t>
- baz
+ done
 </t>
 )");
 }
@@ -485,11 +491,23 @@ TEST_CASE("unordered list", "[basic]")
     test_rst2rfcxml(
         R"(
 * One
+
+  * Alpha
+  * Beta
+
 * Two
 )",
         R"(<ul>
  <li>
   One
+  <ul>
+   <li>
+    Alpha
+   </li>
+   <li>
+    Beta
+   </li>
+  </ul>
  </li>
  <li>
   Two
@@ -523,11 +541,23 @@ TEST_CASE("ordered list", "[basic]")
     test_rst2rfcxml(
         R"(
 1. One
+
+   1. Alpha
+   2. Beta
+
 2. Two
 )",
         R"(<ol>
  <li>
   One
+  <ol>
+   <li>
+    Alpha
+   </li>
+   <li>
+    Beta
+   </li>
+  </ol>
  </li>
  <li>
   Two
@@ -551,6 +581,23 @@ TEST_CASE("ordered list with hash", "[basic]")
   Two
  </li>
 </ol>
+)");
+}
+
+TEST_CASE("text", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+Paragraph one.
+
+Paragraph two.
+)",
+        R"(<t>
+ Paragraph one.
+</t>
+<t>
+ Paragraph two.
+</t>
 )");
 }
 

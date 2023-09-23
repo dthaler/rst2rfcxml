@@ -10,6 +10,7 @@
 class xml_context
 {
   public:
+    xml_context(std::string input_value, size_t input_indentation = 0) : value(input_value), indentation(input_indentation) {}
     static const std::string ABSTRACT;
     static const std::string ARTWORK;
     static const std::string ASIDE;
@@ -37,6 +38,7 @@ class xml_context
     static const std::string TITLE;
     static const std::string UNORDERED_LIST;
     std::string value;
+    size_t indentation;
 };
 
 struct author
@@ -83,7 +85,7 @@ class rst2rfcxml
     void
     pop_contexts(size_t level, std::ostream& output_stream);
     void
-    push_context(std::ostream& output_stream, std::string context, std::string attributes = "");
+    push_context(std::ostream& output_stream, std::string context, size_t indentation = 0, std::string attributes = "");
 
   private:
     author&
@@ -110,6 +112,8 @@ class rst2rfcxml
     process_line(std::string current, std::string next, std::ostream& output_stream);
     bool
     in_context(std::string context) const;
+    size_t
+    get_current_context_indentation() const;
     bool
     handle_variable_initializations(std::string line);
     bool
@@ -134,7 +138,7 @@ class rst2rfcxml
     std::map<std::string, author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;
-    std::stack<std::string> _contexts;
+    std::stack<xml_context> _contexts;
     std::map<std::string, std::string> _rst_references;
     std::map<std::string, reference> _xml_references;
 
