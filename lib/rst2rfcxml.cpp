@@ -837,7 +837,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     // Handle definition lists.
     if ((current_indentation != string::npos) && (next_indentation != string::npos) &&
         (next_indentation > current_indentation) &&
-        (current.substr(current_indentation, 2) != "* ")) {
+        (current.substr(current_indentation, 2) != "* ") &&
+        (current.substr(current_indentation, 3) != "#. ")) {
         if (!in_context(xml_context::DEFINITION_LIST)) {
             push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         }
@@ -912,7 +913,7 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
         if (!in_context(xml_context::ORDERED_LIST)) {
             push_context(output_stream, xml_context::ORDERED_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation);
+        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation + 1);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(match.suffix()))
                       << endl;
     } else if (regex_search(line.c_str(), match, regex("^\\* "))) {
@@ -922,7 +923,7 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
         if (!in_context(xml_context::UNORDERED_LIST)) {
             push_context(output_stream, xml_context::UNORDERED_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation);
+        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation + 1);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2)))
                       << endl;
     } else if (current_indentation != string::npos) {
@@ -936,17 +937,18 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
             }
         }
         if (!in_context(xml_context::BLOCKQUOTE) && !in_context(xml_context::CONSUME_BLANK_LINE) &&
-            !in_context(xml_context::DEFINITION_DESCRIPTION) && !in_context(xml_context::DEFINITION_TERM) &&
+            !in_context(xml_context::DEFINITION_TERM) &&
             !in_context(xml_context::LIST_ELEMENT) && !in_context(xml_context::SOURCE_CODE) &&
             !in_context(xml_context::TEXT)) {
             if (in_context(xml_context::FRONT)) {
                 output_authors(output_stream);
                 push_context(output_stream, xml_context::ABSTRACT, current_indentation);
             }
-            if (in_context(xml_context::DEFINITION_LIST)) {
+            if (in_context(xml_context::DEFINITION_LIST) || in_context(xml_context::UNORDERED_LIST) ||
+                in_context(xml_context::ORDERED_LIST)) {
                 pop_context(output_stream);
             }
-            if ((current_indentation > context_indentation) && !in_context(xml_context::ASIDE)) {
+            if ((current_indentation > get_current_context_indentation()) && !in_context(xml_context::ASIDE)) {
                 push_context(output_stream, xml_context::BLOCKQUOTE, current_indentation);
             } else {
                 push_context(output_stream, xml_context::TEXT, current_indentation);

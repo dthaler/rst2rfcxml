@@ -79,13 +79,17 @@ Sample Document Title
       first
      </dt>
      <dd>
-      Description of the term.
+      <t>
+       Description of the term.
+      </t>
      </dd>
      <dt>
       second
      </dt>
      <dd>
-      Description of another term.
+      <t>
+       Description of another term.
+      </t>
      </dd>
     </dl>
     <t>
@@ -131,7 +135,9 @@ Sample Document Title
       sample
      </dt>
      <dd>
-      Definition of the sample field.
+      <t>
+       Definition of the sample field.
+      </t>
      </dd>
     </dl>
    </section>
