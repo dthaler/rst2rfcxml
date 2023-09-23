@@ -211,13 +211,17 @@ baz
   foo
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
  <dt>
   bar
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
 </dl>
 <t>
@@ -245,13 +249,17 @@ done
   foo
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
  <dt>
   bar
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
 </dl>
 <t>
@@ -277,13 +285,17 @@ baz
   <strong>foo</strong>
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
  <dt>
   <strong>bar</strong>
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
 </dl>
 <t>
@@ -309,13 +321,17 @@ baz
   <em>foo</em>
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
  <dt>
   <em>bar</em>
  </dt>
  <dd>
-  description
+  <t>
+   description
+  </t>
  </dd>
 </dl>
 <t>
@@ -496,6 +512,8 @@ TEST_CASE("unordered list", "[basic]")
   * Beta
 
 * Two
+
+done
 )",
         R"(<ul>
  <li>
@@ -513,6 +531,9 @@ TEST_CASE("unordered list", "[basic]")
   Two
  </li>
 </ul>
+<t>
+ done
+</t>
 )");
 }
 
@@ -546,6 +567,8 @@ TEST_CASE("ordered list", "[basic]")
    2. Beta
 
 2. Two
+
+done
 )",
         R"(<ol>
  <li>
@@ -563,6 +586,9 @@ TEST_CASE("ordered list", "[basic]")
   Two
  </li>
 </ol>
+<t>
+ done
+</t>
 )");
 }
 
@@ -572,6 +598,7 @@ TEST_CASE("ordered list with hash", "[basic]")
         R"(
 #. One
 #. Two
+   continued
 )",
         R"(<ol>
  <li>
@@ -579,6 +606,7 @@ TEST_CASE("ordered list with hash", "[basic]")
  </li>
  <li>
   Two
+  continued
  </li>
 </ol>
 )");
