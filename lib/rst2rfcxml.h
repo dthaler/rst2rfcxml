@@ -124,7 +124,9 @@ class rst2rfcxml
     handle_section_title(
         int level, std::string marker, std::string current, std::string next, std::ostream& output_stream);
     std::string
-    replace_links(std::string line);
+    replace_reference_links(std::string line);
+    std::string
+    replace_term_links(std::string line);
     std::string
     handle_escapes_and_links(std::string line);
     void
