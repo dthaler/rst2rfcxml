@@ -118,6 +118,7 @@ rst2rfcxml::output_header(ostream& output_stream)
     push_context(
         output_stream,
         xml_context::RFC,
+        0,
         fmt::format(
             "ipr=\"{}\" docName=\"{}\" category=\"{}\" submissionType=\"{}\"",
             _ipr,
@@ -176,7 +177,7 @@ rst2rfcxml::output_authors(ostream& output_stream) const
 }
 
 void
-rst2rfcxml::push_context(ostream& output_stream, string context, string attributes)
+rst2rfcxml::push_context(ostream& output_stream, string context, size_t indentation, string attributes)
 {
     if (context != xml_context::CONSUME_BLANK_LINE) {
         output_stream << _spaces(_contexts.size()) << "<" << context;
@@ -185,20 +186,20 @@ rst2rfcxml::push_context(ostream& output_stream, string context, string attribut
         }
         output_stream << ">" << endl;
     }
-    _contexts.push(context);
+    _contexts.push(xml_context(context, indentation));
 }
 
 void
 rst2rfcxml::pop_context(ostream& output_stream)
 {
-    if (_contexts.top() == xml_context::TABLE_BODY && !_table_cell_rst.empty()) {
+    string top = _contexts.top().value;
+    if (top == xml_context::TABLE_BODY && !_table_cell_rst.empty()) {
         // Output last row in the table before closing the table.
         output_table_row(output_stream);
     }
-    if (_contexts.top() != xml_context::CONSUME_BLANK_LINE) {
+    if (top != xml_context::CONSUME_BLANK_LINE) {
         output_stream << _spaces(_contexts.size() - 1);
     }
-    string top = _contexts.top();
     if (top.empty()) {
         // CONSUME_BLANK_LINE, nothing to do.
     } else {
@@ -219,7 +220,7 @@ rst2rfcxml::pop_contexts(size_t level, ostream& output_stream)
 void
 rst2rfcxml::pop_contexts_until(string end, ostream& output_stream)
 {
-    while (_contexts.size() > 0 && _contexts.top() != end) {
+    while (_contexts.size() > 0 && _contexts.top().value != end) {
         pop_context(output_stream);
     }
 }
@@ -298,13 +299,13 @@ rst2rfcxml::replace_links(string line)
                 }
                 reference->use_count++;
 #if 0
-				// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
-				// if relative is present, but xml2rfc gives an error.
-				if (reference.xml_target.empty()) {
-					return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
-				} else {
-					return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
-				}
+		// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
+		// if relative is present, but xml2rfc gives an error.
+		if (reference.xml_target.empty()) {
+			return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
+		} else {
+			return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
+		}
 #else
                 return fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
 #endif
@@ -667,7 +668,8 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
 bool
 rst2rfcxml::handle_section_title(int level, string marker, string current, string next, ostream& output_stream)
 {
-    if ((current.find_first_not_of(" ", 0) != string::npos) && next.starts_with(marker) &&
+    size_t current_indentation = current.find_first_not_of(" ");
+    if ((current_indentation != string::npos) && next.starts_with(marker) &&
         next.find_first_not_of(marker, 0) == string::npos) {
         // Current line is a section heading.
         pop_contexts(BASE_SECTION_LEVEL + level - 1, output_stream);
@@ -677,7 +679,10 @@ rst2rfcxml::handle_section_title(int level, string marker, string current, strin
         }
         string title = handle_escapes_and_links(current);
         push_context(
-            output_stream, xml_context::SECTION, fmt::format("anchor=\"{}\" title=\"{}\"", _anchor(title), title));
+            output_stream,
+            xml_context::SECTION,
+            current_indentation,
+            fmt::format("anchor=\"{}\" title=\"{}\"", _anchor(title), title));
         return true;
     }
     if (current.starts_with(marker) && current.find_first_not_of(marker, 0) == string::npos &&
@@ -699,7 +704,7 @@ rst2rfcxml::handle_title_line(string current, string next, ostream& output_strea
 
         // If in front matter, this is the start of the title.
         if (in_context(xml_context::FRONT)) {
-            push_context(output_stream, xml_context::TITLE, fmt::format("abbrev=\"{}\"", _abbreviated_title));
+            push_context(output_stream, xml_context::TITLE, 0, fmt::format("abbrev=\"{}\"", _abbreviated_title));
             return true;
         }
 
@@ -727,6 +732,14 @@ rst2rfcxml::handle_title_line(string current, string next, ostream& output_strea
 int
 rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 {
+    size_t current_indentation = current.find_first_not_of(" ");
+    size_t next_indentation = next.find_first_not_of(" ");
+
+    while (current_indentation < get_current_context_indentation()) {
+        pop_context(output_stream);
+    }
+    size_t context_indentation = get_current_context_indentation();
+
     if (current == ".. contents::") {
         // Include table of contents.
         // This is already the default in rfc2xml.
@@ -745,29 +758,28 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         if (in_context(xml_context::TEXT)) {
             pop_context(output_stream);
         }
-        push_context(output_stream, xml_context::SOURCE_CODE);
+        push_context(output_stream, xml_context::SOURCE_CODE, current_indentation);
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
     if (current == ".. glossary::") {
-        push_context(output_stream, xml_context::DEFINITION_LIST);
+        push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
     if (current.starts_with(".. admonition:: ")) {
         // Pop contexts until SECTION.
-        while ((_contexts.size() > 0) && (_contexts.top() != xml_context::SECTION)) {
+        while ((_contexts.size() > 0) && (_contexts.top().value != xml_context::SECTION)) {
             pop_context(output_stream);
         }
 
-        push_context(output_stream, xml_context::ASIDE);
+        push_context(output_stream, xml_context::ASIDE, current_indentation + 1);
         string name = handle_escapes_and_links(current.substr(16));
         output_stream << fmt::format("{}<t><strong>{}</strong></t>", _spaces(_contexts.size()), name) << endl;
-        push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
     if (current.starts_with(".. table:: ")) {
-        push_context(output_stream, xml_context::TABLE);
+        push_context(output_stream, xml_context::TABLE, current_indentation + 1);
         string name = handle_escapes_and_links(current.substr(11));
         output_stream << fmt::format("{}<name>{}</name>", _spaces(_contexts.size()), name) << endl;
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
@@ -790,7 +802,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     }
 
     // Close any contexts that end at a blank line.
-    if (current.find_first_not_of(" ") == string::npos) {
+    if (current_indentation == string::npos) {
         if (in_context(xml_context::CONSUME_BLANK_LINE)) {
             pop_context(output_stream);
             return 0;
@@ -823,15 +835,13 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     }
 
     // Handle definition lists.
-    size_t current_indentation = current.find_first_not_of(" ");
-    size_t next_indentation = next.find_first_not_of(" ");
     if ((current_indentation != string::npos) && (next_indentation != string::npos) &&
         (next_indentation > current_indentation) &&
         (current.substr(current_indentation, 2) != "* ")) {
         if (!in_context(xml_context::DEFINITION_LIST)) {
-            push_context(output_stream, xml_context::DEFINITION_LIST);
+            push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::DEFINITION_TERM);
+        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation);
     }
 
     // Handle artwork.
@@ -859,99 +869,94 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
                 }
             }
             pop_contexts(context_level, output_stream);
-            push_context(output_stream, xml_context::ARTWORK);
+            if (in_context(xml_context::TEXT)) {
+                pop_context(output_stream);
+            }
+            push_context(output_stream, xml_context::ARTWORK, current_indentation);
             push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
             return 0;
         }
     }
 
-    // Handle blockquote.
-    // Blank lines are required before and after a block quote, but these blank lines are not included as part of the
-    // block quote.
-    if (next.starts_with("  ") && (next.find_first_not_of(" =") != string::npos) && current.empty() &&
-        !in_context(xml_context::SOURCE_CODE) && !in_context(xml_context::ARTWORK) &&
-        !in_context(xml_context::DEFINITION_DESCRIPTION)) {
-        // Pop contexts until SECTION or TABLE_CELL.
-        while ((_contexts.size() > 0) && (_contexts.top() != xml_context::SECTION) &&
-               (_contexts.top() != xml_context::TABLE_CELL)) {
-            pop_context(output_stream);
-        }
-
-        push_context(output_stream, xml_context::BLOCKQUOTE);
-        return 0;
-    }
-
     output_line(current, output_stream);
 
-    // Handle any transitions between current and next.
-    if ((current_indentation != string::npos) && (next_indentation != string::npos) &&
-        (next_indentation > current_indentation) && in_context(xml_context::DEFINITION_TERM)) {
-        pop_context(output_stream);
-        push_context(output_stream, xml_context::DEFINITION_DESCRIPTION);
-    }
     return 0;
 }
 
 bool
 rst2rfcxml::in_context(string context) const
 {
-    return (!_contexts.empty() && _contexts.top() == context);
+    return (!_contexts.empty() && _contexts.top().value == context);
+}
+
+size_t
+rst2rfcxml::get_current_context_indentation() const
+{
+    return _contexts.empty() ? 0 : _contexts.top().indentation;
 }
 
 // Output the previous line.
 void
-rst2rfcxml::output_line(string line, ostream& output_stream)
+rst2rfcxml::output_line(string indented_line, ostream& output_stream)
 {
+    size_t context_indentation = get_current_context_indentation();
+    size_t current_indentation = indented_line.find_first_not_of(" ");
+    string line = (current_indentation == string::npos) ? indented_line : indented_line.substr(current_indentation);
+
     cmatch match;
     if (regex_search(line.c_str(), match, regex("^[\\d]+\\. ")) ||
         regex_search(line.c_str(), match, regex("^#. "))) {
-        if (in_context(xml_context::LIST_ELEMENT)) {
+        if (in_context(xml_context::LIST_ELEMENT) && (current_indentation == context_indentation)) {
             pop_context(output_stream);
         }
         if (!in_context(xml_context::ORDERED_LIST)) {
-            push_context(output_stream, xml_context::ORDERED_LIST);
+            push_context(output_stream, xml_context::ORDERED_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::LIST_ELEMENT);
+        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(match.suffix()))
                       << endl;
-    } else if (line.starts_with("* ")) {
-        if (in_context(xml_context::LIST_ELEMENT)) {
+    } else if (regex_search(line.c_str(), match, regex("^\\* "))) {
+        if (in_context(xml_context::LIST_ELEMENT) && (current_indentation == context_indentation)) {
             pop_context(output_stream);
         }
         if (!in_context(xml_context::UNORDERED_LIST)) {
-            push_context(output_stream, xml_context::UNORDERED_LIST);
+            push_context(output_stream, xml_context::UNORDERED_LIST, current_indentation);
         }
-        push_context(output_stream, xml_context::LIST_ELEMENT);
+        push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2)))
                       << endl;
-    } else if (line.find_first_not_of(" ") != string::npos) {
+    } else if (current_indentation != string::npos) {
+        if (current_indentation > context_indentation) {
+            if (in_context(xml_context::DEFINITION_TERM)) {
+                pop_context(output_stream);
+                push_context(output_stream, xml_context::DEFINITION_DESCRIPTION, current_indentation);
+            } else if (in_context(xml_context::TEXT)) {
+                pop_context(output_stream);
+                push_context(output_stream, xml_context::BLOCKQUOTE, current_indentation);
+            }
+        }
         if (!in_context(xml_context::BLOCKQUOTE) && !in_context(xml_context::CONSUME_BLANK_LINE) &&
             !in_context(xml_context::DEFINITION_DESCRIPTION) && !in_context(xml_context::DEFINITION_TERM) &&
             !in_context(xml_context::LIST_ELEMENT) && !in_context(xml_context::SOURCE_CODE) &&
             !in_context(xml_context::TEXT)) {
             if (in_context(xml_context::FRONT)) {
                 output_authors(output_stream);
-                push_context(output_stream, xml_context::ABSTRACT);
+                push_context(output_stream, xml_context::ABSTRACT, current_indentation);
             }
             if (in_context(xml_context::DEFINITION_LIST)) {
                 pop_context(output_stream);
             }
-            push_context(output_stream, xml_context::TEXT);
+            if ((current_indentation > context_indentation) && !in_context(xml_context::ASIDE)) {
+                push_context(output_stream, xml_context::BLOCKQUOTE, current_indentation);
+            } else {
+                push_context(output_stream, xml_context::TEXT, current_indentation);
+            }
         }
         output_stream << _spaces(_contexts.size()) << handle_escapes_and_links(line) << endl;
-    }
-
-    if (line.find_first_not_of(" ") == string::npos) {
+    } else {
         // End any contexts that end at a blank line.
-        while (!_contexts.empty()) {
-            if (in_context(xml_context::ARTWORK) || in_context(xml_context::BLOCKQUOTE) ||
-                in_context(xml_context::CONSUME_BLANK_LINE) || in_context(xml_context::DEFINITION_DESCRIPTION) ||
-                in_context(xml_context::LIST_ELEMENT) || in_context(xml_context::ORDERED_LIST) ||
-                in_context(xml_context::TEXT) || in_context(xml_context::UNORDERED_LIST)) {
-                pop_context(output_stream);
-            } else {
-                break;
-            }
+        if (in_context(xml_context::TEXT)) {
+            pop_context(output_stream);
         }
     }
 }
