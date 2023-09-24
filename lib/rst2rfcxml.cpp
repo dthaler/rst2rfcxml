@@ -398,6 +398,9 @@ rst2rfcxml::handle_escapes_and_links(string line)
     line = replace_reference_links(line);
     line = replace_term_links(line);
 
+    // Handle interpreted text which must be done after reference links.
+    line = _replace_all_paired(line, "`", "em");
+
     return line;
 }
 
