@@ -25,6 +25,7 @@ TEST_CASE("escapes", "[basic]")
     test_rst2rfcxml("\\*", "<t>\n *\n</t>\n");
     test_rst2rfcxml("\\*foo\\*", "<t>\n *foo*\n</t>\n");
     test_rst2rfcxml("*foo*", "<t>\n <em>foo</em>\n</t>\n");
+    test_rst2rfcxml("`foo`", "<t>\n <em>foo</em>\n</t>\n");
     test_rst2rfcxml("*foo\\*bar*", "<t>\n <em>foo*bar</em>\n</t>\n");
     test_rst2rfcxml("\\|", "<t>\n |\n</t>\n");
     test_rst2rfcxml("&", "<t>\n &amp;\n</t>\n");
