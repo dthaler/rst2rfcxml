@@ -25,6 +25,7 @@ TEST_CASE("escapes", "[basic]")
     test_rst2rfcxml("\\*", "<t>\n *\n</t>\n");
     test_rst2rfcxml("\\*foo\\*", "<t>\n *foo*\n</t>\n");
     test_rst2rfcxml("*foo*", "<t>\n <em>foo</em>\n</t>\n");
+    test_rst2rfcxml("`foo`", "<t>\n <em>foo</em>\n</t>\n");
     test_rst2rfcxml("*foo\\*bar*", "<t>\n <em>foo*bar</em>\n</t>\n");
     test_rst2rfcxml("\\|", "<t>\n |\n</t>\n");
     test_rst2rfcxml("&", "<t>\n &amp;\n</t>\n");
@@ -204,10 +205,10 @@ foo
 bar
   description
 
-baz
+baz :term:`foo-ish<foo>` baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   foo
  </dt>
  <dd>
@@ -215,7 +216,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   bar
  </dt>
  <dd>
@@ -225,7 +226,7 @@ baz
  </dd>
 </dl>
 <t>
- baz
+ baz <xref target="term-foo">foo-ish</xref> baz
 </t>
 )");
 }
@@ -242,10 +243,10 @@ TEST_CASE("definition list with glossary label", "[basic]")
     bar
       description
 
-done
+done :term:`foo` done
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term-foo">
   foo
  </dt>
  <dd>
@@ -253,7 +254,7 @@ done
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term-bar">
   bar
  </dt>
  <dd>
@@ -263,7 +264,7 @@ done
  </dd>
 </dl>
 <t>
- done
+ done <xref target="term-foo">foo</xref> done
 </t>
 )");
 }
@@ -281,7 +282,7 @@ TEST_CASE("bold definition list", "[basic]")
 baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term---foo--">
   <strong>foo</strong>
  </dt>
  <dd>
@@ -289,7 +290,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term---bar--">
   <strong>bar</strong>
  </dt>
  <dd>
@@ -317,7 +318,7 @@ TEST_CASE("italic definition list", "[basic]")
 baz
 )",
         R"(<dl>
- <dt>
+ <dt anchor="term--foo-">
   <em>foo</em>
  </dt>
  <dd>
@@ -325,7 +326,7 @@ baz
    description
   </t>
  </dd>
- <dt>
+ <dt anchor="term--bar-">
   <em>bar</em>
  </dt>
  <dd>
