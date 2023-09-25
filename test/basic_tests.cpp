@@ -79,6 +79,31 @@ done
 )");
 }
 
+TEST_CASE("comment", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+..
+   This whole indented block
+   is a comment.
+
+   Still in the comment.
+
+done
+)",
+        R"(<!--
+ This whole indented block
+ is a comment.
+ 
+ Still in the comment.
+ 
+-->
+<t>
+ done
+</t>
+)");
+}
+
 TEST_CASE("artwork", "[basic]")
 {
     test_rst2rfcxml(

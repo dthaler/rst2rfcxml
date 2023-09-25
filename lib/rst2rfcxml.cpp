@@ -29,6 +29,7 @@ const string xml_context::ASIDE = "aside";
 const string xml_context::BACK = "back";
 const string xml_context::BLOCKQUOTE = "blockquote";
 const string xml_context::CONSUME_BLANK_LINE = ""; // Pseudo XML context that maps to nothing.
+const string xml_context::COMMENT = "comment";
 const string xml_context::DEFINITION_LIST = "dl";
 const string xml_context::DEFINITION_TERM = "dt";
 const string xml_context::DEFINITION_DESCRIPTION = "dd";
@@ -179,7 +180,9 @@ rst2rfcxml::output_authors(ostream& output_stream) const
 void
 rst2rfcxml::push_context(ostream& output_stream, string context, size_t indentation, string attributes)
 {
-    if (context != xml_context::CONSUME_BLANK_LINE) {
+    if (context == xml_context::COMMENT) {
+        output_stream << _spaces(_contexts.size()) << "<!--" << endl;
+    } else if (context != xml_context::CONSUME_BLANK_LINE) {
         output_stream << _spaces(_contexts.size()) << "<" << context;
         if (!attributes.empty()) {
             output_stream << " " << attributes;
@@ -202,6 +205,8 @@ rst2rfcxml::pop_context(ostream& output_stream)
     }
     if (top.empty()) {
         // CONSUME_BLANK_LINE, nothing to do.
+    } else if (top == xml_context::COMMENT) {
+        output_stream << "-->" << endl;
     } else {
         output_stream << "</" << top << ">" << endl;
     }
@@ -824,6 +829,10 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         // Recursively process filename.
         return process_file(input_filename, output_stream);
     }
+    if (current.starts_with("..") && (current.substr(2).find_first_not_of(" ") == string::npos)) {
+        push_context(output_stream, xml_context::COMMENT, current_indentation + 1);
+        return 0;
+    }
 
     // Close any contexts that end at an unindented line.
     if (!current.empty() && !isspace(current[0])) {
@@ -958,7 +967,9 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
         push_context(output_stream, xml_context::LIST_ELEMENT, current_indentation + 1);
         output_stream << fmt::format("{}{}", _spaces(_contexts.size()), handle_escapes_and_links(line.substr(2)))
                       << endl;
-    } else if (current_indentation != string::npos) {
+    } else if (in_context(xml_context::COMMENT)) {
+        output_stream << _spaces(_contexts.size()) << _handle_escapes(line) << endl;
+    } else if ((current_indentation != string::npos)) {
         if (current_indentation > context_indentation) {
             if (in_context(xml_context::DEFINITION_TERM)) {
                 pop_context(output_stream);

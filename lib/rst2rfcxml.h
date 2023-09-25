@@ -16,6 +16,7 @@ class xml_context
     static const std::string ASIDE;
     static const std::string BACK;
     static const std::string BLOCKQUOTE;
+    static const std::string COMMENT;
     static const std::string CONSUME_BLANK_LINE; // Pseudo XML context that maps to nothing.
     static const std::string DEFINITION_LIST;
     static const std::string DEFINITION_TERM;
