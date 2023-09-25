@@ -4,7 +4,7 @@
 #include "CLI11.hpp"
 #include "rst2rfcxml.h"
 
-#define VERSION "rst2xmlrfc 0.7.0"
+#define VERSION "rst2xmlrfc 0.8.0"
 
 using namespace std;
 
