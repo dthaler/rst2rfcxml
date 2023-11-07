@@ -48,6 +48,13 @@ TEST_CASE("references", "[basic]")
 `Sample reference <https://example.com/target>`_
 )",
         "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
+
+        test_rst2rfcxml(
+        R"(
+.. |ref[SAMPLE].target| replace:: https://example.com/target
+`Sample reference <https://example.com/target#fragment>`_
+)",
+        "<t>\n <relref target=\"SAMPLE\" section=\"\" relative=\"fragment\" derivedLink=\"https://example.com/target#fragment\">Sample reference</relref>\n</t>\n");
 }
 
 TEST_CASE("titles", "[basic]")
