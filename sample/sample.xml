@@ -126,9 +126,9 @@ Sample Document Title
      The following is a code block followed by a definition list to define fields:
     </t>
     <sourcecode>
-    typedef struct {
-       int sample;
-    } sample_t;
+typedef struct {
+   int sample;
+} sample_t;
     </sourcecode>
     <dl>
      <dt anchor="term-sample">
@@ -155,8 +155,8 @@ Sample Document Title
      Following is a literal block:
     </t>
     <artwork>
-         This is text
-  that goes in a literal block.
+       This is text
+that goes in a literal block.
     </artwork>
    </section>
   </section>
