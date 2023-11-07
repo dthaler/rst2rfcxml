@@ -145,6 +145,7 @@ _output_optional_text_element(ostream& output_stream, string name, string value)
     }
 }
 
+// Generare the authors section in XML.
 void
 rst2rfcxml::output_authors(ostream& output_stream) const
 {
@@ -192,10 +193,40 @@ rst2rfcxml::push_context(ostream& output_stream, string context, size_t indentat
     _contexts.push(xml_context(context, indentation));
 }
 
+static size_t
+find_extra_indentation(string content)
+{
+    size_t extra_indentation = SIZE_MAX;
+    stringstream ss(content);
+    string line;
+    while (getline(ss, line)) {
+        size_t indentation = line.find_first_not_of(" ");
+        if (extra_indentation > indentation) {
+            extra_indentation = indentation;
+        }
+    }
+    return extra_indentation;
+}
+
+// Forward declaration.
+static string _handle_xml_escapes(string line);
+
 void
 rst2rfcxml::pop_context(ostream& output_stream)
 {
     string top = _contexts.top().value;
+    if ((top == xml_context::ARTWORK || top == xml_context::SOURCE_CODE) && !_block_rst.empty()) {
+        // Process all content previously stored in the block.
+        string rst_content = _block_rst;
+        size_t consume_indentation = find_extra_indentation(rst_content);
+        stringstream ss(rst_content);
+        string line;
+        while (getline(ss, line)) {
+            string value = (line.length() > consume_indentation) ? line.substr(consume_indentation) : "";
+            output_stream << _handle_xml_escapes(value) << endl;
+        }
+        _block_rst.clear();
+    }
     if (top == xml_context::TABLE_BODY && !_table_cell_rst.empty()) {
         // Output last row in the table before closing the table.
         output_table_row(output_stream);
@@ -331,8 +362,7 @@ rst2rfcxml::replace_reference_links(string line)
                 }
                 reference->use_count++;
 #if 0
-		// TODO: xml2rfc seems to have a bug in it.  RFC 7991 says the section is ignored
-		// if relative is present, but xml2rfc gives an error.
+		// TODO(issue #124): use relref not xref.
 		if (reference.xml_target.empty()) {
 			return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
 		} else {
@@ -411,6 +441,7 @@ rst2rfcxml::handle_escapes_and_links(string line)
 
 constexpr size_t BASE_SECTION_LEVEL = 2; // <rfc><front/middle/back>.
 
+// Returns true if the current line was handled, false if not.
 static bool
 _handle_variable_initialization(string line, string label, string& field)
 {
@@ -597,6 +628,7 @@ rst2rfcxml::output_table_row(ostream& output_stream)
 
         push_context(output_stream, xml_context::TABLE_CELL);
 
+        // Process all content previously stored in the table cell.
         string rst_content = _table_cell_rst[column];
         stringstream ss(rst_content);
         process_input_stream(ss, output_stream);
@@ -701,6 +733,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
 }
 
 // Handle a section title.
+// Returns true if the current line was handled, false if not.
 bool
 rst2rfcxml::handle_section_title(int level, string marker, string current, string next, ostream& output_stream)
 {
@@ -731,6 +764,7 @@ rst2rfcxml::handle_section_title(int level, string marker, string current, strin
 }
 
 // Handle document and section titles.
+// Returns true if the current line was handled, false if not.
 bool
 rst2rfcxml::handle_title_line(string current, string next, ostream& output_stream)
 {
@@ -763,7 +797,7 @@ rst2rfcxml::handle_title_line(string current, string next, ostream& output_strea
     return false;
 }
 
-// Process a new line of input.
+// Process a new line of RST input.
 // Returns 0 on success, non-zero error code on failure.
 int
 rst2rfcxml::process_line(string current, string next, ostream& output_stream)
@@ -870,7 +904,8 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
 
     // Handle source code and artwork, which preserve literal indentation.
     if (in_context(xml_context::ARTWORK) || in_context(xml_context::SOURCE_CODE)) {
-        output_stream << _handle_xml_escapes(current) << endl;
+        // Push line into the block.
+        _block_rst += current + "\n";
         return 0;
     }
 
@@ -899,7 +934,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
                 length++;
             }
 
-            // Get original contect, which might be SECTION or TABLE_CELL,
+            // Get original context, which might be SECTION or TABLE_CELL,
             // each of which can contain ARTWORK.
             size_t context_level = _contexts.size();
 
@@ -925,12 +960,14 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     return 0;
 }
 
+// Return true if the current context is the one specified, false if not.
 bool
 rst2rfcxml::in_context(string context) const
 {
     return (!_contexts.empty() && _contexts.top().value == context);
 }
 
+// Get the number of spaces the current context is indented.
 size_t
 rst2rfcxml::get_current_context_indentation() const
 {
@@ -1023,6 +1060,7 @@ rst2rfcxml::process_input_stream(istream& input_stream, ostream& output_stream)
     return process_line(_previous_line, {}, output_stream);
 }
 
+// Generate references section in XML.
 void
 rst2rfcxml::output_references(ostream& output_stream, string type, string title)
 {
@@ -1072,6 +1110,7 @@ rst2rfcxml::output_references(ostream& output_stream, string type, string title)
     pop_contexts_until(xml_context::BACK, output_stream);
 }
 
+// Generate XML back matter.
 void
 rst2rfcxml::output_back(ostream& output_stream)
 {
@@ -1081,6 +1120,7 @@ rst2rfcxml::output_back(ostream& output_stream)
 }
 
 // Process an input file that contributes to an output file.
+// Returns 0 on success, non-zero error code on failure.
 int
 rst2rfcxml::process_file(filesystem::path input_filename, ostream& output_stream)
 {
@@ -1102,6 +1142,7 @@ rst2rfcxml::process_file(filesystem::path input_filename, ostream& output_stream
 }
 
 // Process multiple input files that contribute to an output file.
+// Returns 0 on success, non-zero error code on failure.
 int
 rst2rfcxml::process_files(vector<string> input_filenames, ostream& output_stream)
 {

@@ -17,7 +17,8 @@ test_rst2rfcxml(const char* input, const char* expected_output)
     ostringstream os;
     rst2rfcxml.process_input_stream(is, os);
     rst2rfcxml.pop_contexts(0, os);
-    REQUIRE(os.str() == expected_output);
+    string actual_output = os.str();
+    REQUIRE(actual_output == expected_output);
 }
 
 TEST_CASE("escapes", "[basic]")
@@ -112,8 +113,8 @@ Paragraph:
 
 ::
 
-  Literal block
-     of text
+     Literal
+  block of text
   (2 * x < y) + (3 * (a & b) > c)
 
 done
@@ -122,8 +123,8 @@ done
  Paragraph:
 </t>
 <artwork>
-Literal block
-   of text
+   Literal
+block of text
 (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
 </artwork>
 <t>

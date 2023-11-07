@@ -148,6 +148,9 @@ class rst2rfcxml
     // Collected multi-line RST content of a table cell.
     std::vector<std::string> _table_cell_rst;
 
+    // Collected multi-line RST content of a block of artwork or sourcecode.
+    std::string _block_rst;
+
     // Some RST markup modifies the previous line, so we need to
     // keep track of the previous line and process it only after
     // we know whether the next one affects it.
