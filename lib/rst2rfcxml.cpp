@@ -361,16 +361,11 @@ rst2rfcxml::replace_reference_links(string line)
                     return line;
                 }
                 reference->use_count++;
-#if 0
-		// TODO(issue #124): use relref not xref.
-		if (reference.xml_target.empty()) {
-			return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\">{}</xref>{}", before, reference.anchor, fragment, title, after);
-		} else {
-			return fmt::format("{}<xref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</xref>{}", before, reference.anchor, fragment, reference.xml_target, fragment, title, after);
-		}
-#else
-                return fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, reference->anchor, title, after);
-#endif
+                if (reference->target.empty()) {
+                    return fmt::format("{}<relref target=\"{}\" section=\"\" relative=\"{}\">{}</relref>{}", before, reference->anchor, fragment, title, after);
+                } else {
+                    return fmt::format("{}<relref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</relref>{}", before, reference->anchor, fragment, reference->target, fragment, title, after);
+                }
             } else {
                 filename = middle.substr(title_end + 4, link_end - title_end - 4);
                 reference* reference = get_reference_by_target(filename);
