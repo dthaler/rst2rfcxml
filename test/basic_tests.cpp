@@ -69,9 +69,9 @@ TEST_CASE("code block", "[basic]")
 done
 )",
         R"(<sourcecode>
-   foo
-      bar
-   z = (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
+foo
+   bar
+z = (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
 </sourcecode>
 <t>
  done
@@ -122,9 +122,9 @@ done
  Paragraph:
 </t>
 <artwork>
-  Literal block
-     of text
-  (2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
+Literal block
+   of text
+(2 * x &lt; y) + (3 * (a &amp; b) &gt; c)
 </artwork>
 <t>
  done
@@ -144,8 +144,8 @@ done
  Paragraph:
 </t>
 <artwork>
-  Literal block
-     of text
+Literal block
+   of text
 </artwork>
 <t>
  done
@@ -165,8 +165,8 @@ done
  Paragraph:
 </t>
 <artwork>
-  Literal block
-     of text
+Literal block
+   of text
 </artwork>
 <t>
  done
@@ -452,7 +452,7 @@ Bar   Another example
      Example:
     </t>
     <artwork>
-  *x* &amp;y&amp; &lt;z&gt;
+*x* &amp;y&amp; &lt;z&gt;
     </artwork>
    </td>
   </tr>
