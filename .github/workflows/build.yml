@@ -14,7 +14,9 @@ jobs:
     strategy:
       matrix:
         configurations: [Debug, Release]
+        arch: [armv7]
     runs-on: ubuntu-20.04
+    name: Build on Ubuntu ${{matrix.arch}}
     env:
       # Configuration type to build.  For documentation on how build matrices work, see
       # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
@@ -31,6 +33,9 @@ jobs:
         if: steps.skip_check.outputs.should_skip != 'true'
         with:
           submodules: 'recursive'
+
+      - uses: uraimo/run-on-arch-action@v2
+        if: steps.skip_check.outputs.should_skip != 'true'
 
       - name: Build
         if: steps.skip_check.outputs.should_skip != 'true'
