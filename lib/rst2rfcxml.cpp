@@ -330,6 +330,37 @@ rst2rfcxml::replace_term_links(string line)
     return line;
 }
 
+static bool
+is_rfc_section(string title)
+{
+    if (title.starts_with("RFC")) {
+        return true;
+    }
+    if ((title.starts_with("Section ") || title.starts_with("section ")) &&
+        title.find(" of RFC") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
+static string
+get_title_section(string& title, string& fragment)
+{
+    if (fragment.starts_with("#section-")) {
+        string section = fragment.substr(9);
+        fragment.clear();
+
+        if (is_rfc_section(title)) {
+            title.clear();
+        }
+        return section;
+    }
+    if (fragment.starts_with("#")) {
+        return fragment.substr(1);
+    }
+    return {};
+}
+
 string
 rst2rfcxml::replace_reference_links(string line)
 {
@@ -354,18 +385,34 @@ rst2rfcxml::replace_reference_links(string line)
             string fragment;
             if (fragment_start != string::npos) {
                 filename = middle.substr(title_end + 4, fragment_start - title_end - 4);
-                fragment = middle.substr(fragment_start + 1, link_end - fragment_start - 1);
+                fragment = middle.substr(fragment_start, link_end - fragment_start);
                 reference* reference = get_reference_by_target(filename);
                 if (reference == nullptr) {
                     // Reference not found.
-                    return line;
+                    fragment = {};
+                    filename = middle.substr(title_end + 4, link_end - title_end - 4);
+                    reference = get_reference_by_target(filename);
+                    if (reference == nullptr) {
+                        return line;
+                    }
                 }
                 reference->use_count++;
-                if (reference->target.empty()) {
-                    return fmt::format("{}<relref target=\"{}\" section=\"\" relative=\"{}\">{}</relref>{}", before, reference->anchor, fragment, title, after);
-                } else {
-                    return fmt::format("{}<relref target=\"{}\" section=\"\" relative=\"{}\" derivedLink=\"{}#{}\">{}</relref>{}", before, reference->anchor, fragment, reference->target, fragment, title, after);
+                string section = get_title_section(title, fragment);
+
+                // The latest spec is https://www.ietf.org/archive/id/draft-iab-rfc7991bis-04.html#element.xref
+                string result = fmt::format("{}<xref target=\"{}\"", before, reference->anchor);
+                if (!section.empty()) {
+                    result += fmt::format(" section=\"{}\"", section);
+                    if (!fragment.empty()) {
+                        result += fmt::format(" relative=\"{}\"", fragment);
+                    }
                 }
+                if (title.empty()) {
+                    result += fmt::format("/>");
+                } else {
+                    result += fmt::format(">{}</xref>", title);
+                }
+                return result + after;
             } else {
                 filename = middle.substr(title_end + 4, link_end - title_end - 4);
                 reference* reference = get_reference_by_target(filename);

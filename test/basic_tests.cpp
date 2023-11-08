@@ -40,8 +40,10 @@ TEST_CASE("escapes", "[basic]")
 
 TEST_CASE("references", "[basic]")
 {
+    // Citation without reference details.
     test_rst2rfcxml("`Foo bar`_", "<t>\n <xref target=\"foo-bar\">Foo bar</xref>\n</t>\n");
 
+    // Citation with reference details.
     test_rst2rfcxml(
         R"(
 .. |ref[SAMPLE].target| replace:: https://example.com/target
@@ -49,12 +51,45 @@ TEST_CASE("references", "[basic]")
 )",
         "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
 
-        test_rst2rfcxml(
+    // Fragment as part of the reference link itself.
+    test_rst2rfcxml(
+        R"(
+.. |ref[SAMPLE].target| replace:: https://example.com/target#fragment
+`Sample reference <https://example.com/target#fragment>`_
+)",
+        "<t>\n <xref target=\"SAMPLE\">Sample reference</xref>\n</t>\n");
+
+    // Non-RFC reference with fragment.
+    test_rst2rfcxml(
         R"(
 .. |ref[SAMPLE].target| replace:: https://example.com/target
 `Sample reference <https://example.com/target#fragment>`_
 )",
-        "<t>\n <relref target=\"SAMPLE\" section=\"\" relative=\"fragment\" derivedLink=\"https://example.com/target#fragment\">Sample reference</relref>\n</t>\n");
+        "<t>\n <xref target=\"SAMPLE\" section=\"fragment\" relative=\"#fragment\">Sample reference</xref>\n</t>\n");
+}
+
+TEST_CASE("rfc references", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+.. |ref[RFC8126].target| replace:: https://www.rfc-editor.org/rfc/rfc8126.html
+See `RFC 8126 section 4 <https://www.rfc-editor.org/rfc/rfc8126.html#section-4>`_ for details.
+)",
+        "<t>\n See <xref target=\"RFC8126\" section=\"4\"/> for details.\n</t>\n");
+
+    test_rst2rfcxml(
+        R"(
+.. |ref[RFC8126].target| replace:: https://www.rfc-editor.org/rfc/rfc8126.html
+See `RFC 8126, section 4 <https://www.rfc-editor.org/rfc/rfc8126.html#section-4>`_ for details.
+)",
+        "<t>\n See <xref target=\"RFC8126\" section=\"4\"/> for details.\n</t>\n");
+
+    test_rst2rfcxml(
+        R"(
+.. |ref[RFC8126].target| replace:: https://www.rfc-editor.org/rfc/rfc8126.html
+See `Section 4 of RFC 8126 <https://www.rfc-editor.org/rfc/rfc8126.html#section-4>`_ for details.
+)",
+        "<t>\n See <xref target=\"RFC8126\" section=\"4\"/> for details.\n</t>\n");
 }
 
 TEST_CASE("titles", "[basic]")
