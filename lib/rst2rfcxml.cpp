@@ -866,7 +866,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         output_header(output_stream);
         return 0;
     }
-    if (current == ".. code-block::") {
+    if (current.starts_with(".. code-block::") && current.find_first_not_of(" ", 15) == std::string::npos) {
         if (in_context(xml_context::TEXT)) {
             pop_context(output_stream);
         }
@@ -1048,6 +1048,14 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
                       << endl;
     } else if (in_context(xml_context::COMMENT)) {
         output_stream << _spaces(_contexts.size()) << _handle_escapes(line) << endl;
+    } else if (line.starts_with("|")) {
+        // Handle line blocks, preserving leading whitespace.
+        string value = (line.length() > 1) ? line.substr(2) : "";
+        size_t count = value.find_first_not_of(" ");
+        if (count == std::string::npos) {
+            count = 0;
+        }
+        output_stream << _spaces(count) << handle_escapes_and_links(value) << "<br/>" << endl;
     } else if ((current_indentation != string::npos)) {
         if (current_indentation > context_indentation) {
             if (in_context(xml_context::DEFINITION_TERM)) {

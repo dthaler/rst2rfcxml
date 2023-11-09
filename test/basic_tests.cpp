@@ -99,6 +99,22 @@ TEST_CASE("titles", "[basic]")
     test_rst2rfcxml("Foo\n~~~\n", "<section anchor=\"foo\" title=\"Foo\">\n</section>\n");
 }
 
+TEST_CASE("line block", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+|  First line
+| Second line
+|
+|  Fourth line
+)",
+        R"( First line<br/>
+Second line<br/>
+<br/>
+ Fourth line<br/>
+)");
+}
+
 TEST_CASE("code block", "[basic]")
 {
     test_rst2rfcxml(
