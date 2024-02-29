@@ -131,6 +131,10 @@ class rst2rfcxml
     std::string
     replace_term_links(std::string line);
     std::string
+    define_anchor(std::string term);
+    std::string
+    lookup_anchor(std::string term);
+    std::string
     handle_escapes_and_links(std::string line);
     void
     output_table_row(std::ostream& output_stream);
@@ -140,6 +144,7 @@ class rst2rfcxml
     std::string _ipr;
     std::string _category;
     std::vector<size_t> _column_indices;
+    std::map<std::string, std::string> _anchors;
     std::map<std::string, author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;
