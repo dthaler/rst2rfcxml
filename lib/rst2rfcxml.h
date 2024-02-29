@@ -118,6 +118,8 @@ class rst2rfcxml
     bool
     handle_variable_initializations(std::string line);
     bool
+    is_cell_blank(std::string current, int column);
+    bool
     handle_table_line(std::string current, std::string next, std::ostream& output_stream);
     bool
     handle_title_line(std::string current, std::string next, std::ostream& output_stream);

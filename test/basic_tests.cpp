@@ -477,6 +477,67 @@ Bar   Another example
 )");
 }
 
+TEST_CASE("table centered", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+
+======  =====  ==============================================
+source  value  description
+======  =====  ==============================================
+  K       0    use 32-bit 'imm' value as source operand
+  X       1    use 'src_reg' register value as source operand
+======  =====  ==============================================
+
+)",
+        R"(<table>
+ <thead>
+  <tr>
+   <th>source</th>
+   <th>value</th>
+   <th>description</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>
+    <blockquote>
+     K
+    </blockquote>
+   </td>
+   <td>
+    <blockquote>
+     0
+    </blockquote>
+   </td>
+   <td>
+    <t>
+     use 32-bit 'imm' value as source operand
+    </t>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <blockquote>
+     X
+    </blockquote>
+   </td>
+   <td>
+    <blockquote>
+     1
+    </blockquote>
+   </td>
+   <td>
+    <t>
+     use 'src_reg' register value as source operand
+    </t>
+   </td>
+  </tr>
+ </tbody>
+</table>
+)");
+}
+
 TEST_CASE("table with literal cell", "[basic]")
 {
     test_rst2rfcxml(
