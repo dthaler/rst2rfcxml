@@ -681,6 +681,19 @@ rst2rfcxml::output_table_row(ostream& output_stream)
     _table_cell_rst.clear();
 }
 
+bool
+rst2rfcxml::is_cell_blank(string current, int column)
+{
+    size_t start_column = _column_indices[column];
+    size_t end_column = (_column_indices.size() > (column + 1)) ? _column_indices[column + 1] : current.size();
+    for (size_t i = start_column; i < end_column && i < current.size(); i++) {
+        if (!isspace(current[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Perform table handling.
 // Returns true if a valid table line was processed, false if it's not a table line.
 bool
@@ -746,7 +759,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
         // Each line of text starts a new row, except when there is a blank cell in the first column.
         // In that case, that line of text is parsed as a continuation line.
         size_t start_column = _column_indices[0];
-        bool new_row = (current.length() > start_column) && !isspace(current[start_column]);
+        bool new_row = (current.length() > start_column) && !is_cell_blank(current, 0);
 
         if (new_row && !_table_cell_rst.empty()) {
             // Output previous row which is now complete.
