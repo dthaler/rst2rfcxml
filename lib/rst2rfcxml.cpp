@@ -304,6 +304,33 @@ _replace_all(string line, string from, string to)
 }
 
 string
+rst2rfcxml::define_anchor(string value)
+{
+    string anchor;
+    if (_anchors.find(value) == _anchors.end()) {
+        // Create a new anchor.
+        anchor = _anchor(value);
+    } else {
+        // This is a duplicate anchor definition so create a new one and
+        // map all future lookups to this latest one.
+        anchor = _anchors[value] + "-";
+    }
+    _anchors[value] = anchor;
+    return anchor;
+ }
+
+string
+rst2rfcxml::lookup_anchor(string value)
+{
+    if (_anchors.find(value) != _anchors.end()) {
+        return _anchors[value];
+    }
+
+    // Undefined anchor.
+    return _anchor(value);
+}
+
+string
 rst2rfcxml::replace_term_links(string line)
 {
     size_t start;
@@ -325,7 +352,7 @@ rst2rfcxml::replace_term_links(string line)
             term = middle.substr(label_end + 4, term_end - label_end - 4);
         }
 
-        line = fmt::format("{}<xref target=\"term-{}\">{}</xref>{}", before, _anchor(term), label, after);
+        line = fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, lookup_anchor("term-" + term), label, after);
     }
     return line;
 }
@@ -425,7 +452,7 @@ rst2rfcxml::replace_reference_links(string line)
             }
         }
 
-        line = fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, _anchor(middle), middle, after);
+        line = fmt::format("{}<xref target=\"{}\">{}</xref>{}", before, lookup_anchor(middle), middle, after);
     }
     return line;
 }
@@ -802,11 +829,14 @@ rst2rfcxml::handle_section_title(int level, string marker, string current, strin
             push_context(output_stream, xml_context::MIDDLE);
         }
         string title = handle_escapes_and_links(current);
-        push_context(
-            output_stream,
-            xml_context::SECTION,
-            current_indentation,
-            fmt::format("anchor=\"{}\" title=\"{}\"", _anchor(title), title));
+        string anchor = define_anchor(title);
+        string attributes;
+        if (anchor.empty()) {
+            attributes = fmt::format("title=\"{}\"", title);
+        } else {
+            attributes = fmt::format("anchor=\"{}\" title=\"{}\"", anchor, title);
+        }
+        push_context(output_stream, xml_context::SECTION, current_indentation, attributes);
         return true;
     }
     if (current.starts_with(marker) && current.find_first_not_of(marker, 0) == string::npos &&
@@ -972,8 +1002,13 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         if (!in_context(xml_context::DEFINITION_LIST)) {
             push_context(output_stream, xml_context::DEFINITION_LIST, current_indentation);
         }
-        string attributes = fmt::format("anchor=\"term-{}\"", _anchor(_trim(current)));
-        push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation, attributes);
+        string anchor = define_anchor("term-" + _trim(current));
+        if (anchor.empty()) {
+            push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation);
+        } else {
+            string attributes = fmt::format("anchor=\"{}\"", anchor);
+            push_context(output_stream, xml_context::DEFINITION_TERM, current_indentation, attributes);
+        }
     }
 
     // Handle artwork.
