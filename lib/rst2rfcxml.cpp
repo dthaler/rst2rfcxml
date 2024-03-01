@@ -966,7 +966,7 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
             pop_context(output_stream);
             return 0;
         }
-        if (!next.empty() && !isspace(next[0]) &&
+        if (!next.empty() &&
             (in_context(xml_context::ARTWORK) || in_context(xml_context::SOURCE_CODE))) {
             pop_context(output_stream);
         }
