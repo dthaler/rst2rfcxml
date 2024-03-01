@@ -286,6 +286,110 @@ Literal block
 )");
 }
 
+TEST_CASE("artwork simple end", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+This is a diagram::
+
+    +-+-+-+-+-+-+-+-+
+    |src_reg|dst_reg|
+    +-+-+-+-+-+-+-+-+
+
+This is not part of the diagram.
+)",
+        R"(<t>
+ This is a diagram:
+</t>
+<artwork>
++-+-+-+-+-+-+-+-+
+|src_reg|dst_reg|
++-+-+-+-+-+-+-+-+
+</artwork>
+<t>
+ This is not part of the diagram.
+</t>
+)");
+}
+
+TEST_CASE("artwork complex end", "[basic]")
+{
+    test_rst2rfcxml(R"(
+**regs**
+  The source and destination register numbers, encoded as follows
+  on a little-endian host::
+
+    +-+-+-+-+-+-+-+-+
+    |src_reg|dst_reg|
+    +-+-+-+-+-+-+-+-+
+
+  and as follows on a big-endian host::
+
+    +-+-+-+-+-+-+-+-+
+    |dst_reg|src_reg|
+    +-+-+-+-+-+-+-+-+
+
+  **src_reg**
+    the source register number (0-10), except where otherwise specified
+
+  **dst_reg**
+    destination register number (0-10)
+
+**offset**
+  signed integer offset used with pointer arithmetic
+)", R"(<dl>
+ <dt anchor="term---regs--">
+  <strong>regs</strong>
+ </dt>
+ <dd>
+  <t>
+   The source and destination register numbers, encoded as follows
+   on a little-endian host:
+  </t>
+  <artwork>
++-+-+-+-+-+-+-+-+
+|src_reg|dst_reg|
++-+-+-+-+-+-+-+-+
+  </artwork>
+  <t>
+   and as follows on a big-endian host:
+  </t>
+  <artwork>
++-+-+-+-+-+-+-+-+
+|dst_reg|src_reg|
++-+-+-+-+-+-+-+-+
+  </artwork>
+  <dl>
+   <dt anchor="term---src_reg--">
+    <strong>src_reg</strong>
+   </dt>
+   <dd>
+    <t>
+     the source register number (0-10), except where otherwise specified
+    </t>
+   </dd>
+   <dt anchor="term---dst_reg--">
+    <strong>dst_reg</strong>
+   </dt>
+   <dd>
+    <t>
+     destination register number (0-10)
+    </t>
+   </dd>
+  </dl>
+ </dd>
+ <dt anchor="term---offset--">
+  <strong>offset</strong>
+ </dt>
+ <dd>
+  <t>
+   signed integer offset used with pointer arithmetic
+  </t>
+ </dd>
+</dl>
+)");
+}
+
 TEST_CASE("aside", "[basic]")
 {
     test_rst2rfcxml(
