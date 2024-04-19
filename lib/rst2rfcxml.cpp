@@ -741,8 +741,7 @@ rst2rfcxml::handle_table_line(string current, string next, ostream& output_strea
             return true;
         }
 
-        while (in_context(xml_context::TEXT) || in_context(xml_context::DEFINITION_DESCRIPTION) ||
-               in_context(xml_context::DEFINITION_LIST)) {
+        while (in_context(xml_context::TEXT) || in_context(xml_context::DEFINITION_LIST)) {
             pop_context(output_stream);
         }
 

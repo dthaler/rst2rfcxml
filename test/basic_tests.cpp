@@ -900,6 +900,88 @@ TEST_CASE("table with caption", "[basic]")
 )");
 }
 
+TEST_CASE("definition list with table", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+foo
+  Here's a table:
+
+    ====  ====
+    xyz   abc
+    ====  ====
+    1     11
+    2     12
+    ====  ====
+
+  and some more discussion.
+
+bar
+  description
+
+baz
+)",
+        R"(<dl>
+ <dt anchor="term-foo">
+  foo
+ </dt>
+ <dd>
+  <t>
+   Here's a table:
+  </t>
+  <table>
+   <thead>
+    <tr>
+     <th>xyz</th>
+     <th>abc</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      <t>
+       1
+      </t>
+     </td>
+     <td>
+      <t>
+       11
+      </t>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <t>
+       2
+      </t>
+     </td>
+     <td>
+      <t>
+       12
+      </t>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <t>
+   and some more discussion.
+  </t>
+ </dd>
+ <dt anchor="term-bar">
+  bar
+ </dt>
+ <dd>
+  <t>
+   description
+  </t>
+ </dd>
+</dl>
+<t>
+ baz
+</t>
+)");
+}
+
 TEST_CASE("unordered list", "[basic]")
 {
     test_rst2rfcxml(
