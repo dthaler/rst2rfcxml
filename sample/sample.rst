@@ -59,10 +59,20 @@ Internal reference: `References`_
 External reference: `External reference text <https://example.com/path>`_.
 
 .. |ref[DRAFT].title| replace:: Sample Title
+.. |ref[DRAFT].author[0].fullname| replace:: D. Thaler
+.. |ref[DRAFT].author[0].initials| replace:: D.
+.. |ref[DRAFT].author[0].surname| replace:: Thaler
+.. |ref[DRAFT].author[1].fullname| replace:: J. Doe
+.. |ref[DRAFT].author[1].initials| replace:: J.
+.. |ref[DRAFT].author[1].surname| replace:: Doe
 .. |ref[DRAFT].seriesInfo.name| replace:: Internet-Draft
 .. |ref[DRAFT].seriesInfo.value| replace:: draft-thaler-bpf-isa-00
+.. |ref[DRAFT].seriesInfo.name| replace:: DOI
+.. |ref[DRAFT].seriesInfo.value| replace:: 0/0
 .. |ref[DRAFT].target| replace:: instruction-set.rst
 .. |ref[DRAFT].type| replace:: informative
+.. |ref[DRAFT].date.month| replace:: April
+.. |ref[DRAFT].date.year| replace:: 2024
 
 External reference to an Internet Draft: `External reference text <instruction-set.rst>`_.
 

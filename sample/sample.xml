@@ -213,7 +213,7 @@ that goes in a literal block.
   <reference anchor="SAMPLE" target="https://example.com/path">
    <front>
     <title>Sample Reference Title</title>
-    <author></author>
+    <author/>
    </front>
   </reference>
  </references>
@@ -221,9 +221,12 @@ that goes in a literal block.
   <reference anchor="DRAFT">
    <front>
     <title>Sample Title</title>
-    <author></author>
+    <author fullname="D. Thaler" initials="D." surname="Thaler"/>
+    <author fullname="J. Doe" initials="J." surname="Doe"/>
+    <date month="April" year="2024"/>
    </front>
    <seriesInfo name='Internet-Draft' value='draft-thaler-bpf-isa-00'/>
+   <seriesInfo name='DOI' value='0/0'/>
   </reference>
  </references>
  </back>
