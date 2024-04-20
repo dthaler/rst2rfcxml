@@ -752,15 +752,15 @@ source  value  description
  </thead>
  <tbody>
   <tr>
-   <td>
-    <blockquote>
+   <td align="center">
+    <t>
      K
-    </blockquote>
+    </t>
    </td>
-   <td>
-    <blockquote>
+   <td align="center">
+    <t>
      0
-    </blockquote>
+    </t>
    </td>
    <td>
     <t>
@@ -769,15 +769,15 @@ source  value  description
    </td>
   </tr>
   <tr>
-   <td>
-    <blockquote>
+   <td align="center">
+    <t>
      X
-    </blockquote>
+    </t>
    </td>
-   <td>
-    <blockquote>
+   <td align="center">
+    <t>
      1
-    </blockquote>
+    </t>
    </td>
    <td>
     <t>

@@ -694,11 +694,17 @@ rst2rfcxml::output_table_row(ostream& output_stream)
 
     for (int column = 0; column < _column_indices.size(); column++) {
         size_t context_level = _contexts.size();
+        string rst_content = _table_cell_rst[column];
+        size_t offset = rst_content.find_first_not_of(" ");
+        string attributes;
+        if (offset > 0) {
+            rst_content = rst_content.substr(offset);
+            attributes = "align=\"center\"";
+        }
 
-        push_context(output_stream, xml_context::TABLE_CELL);
+        push_context(output_stream, xml_context::TABLE_CELL, 0, attributes);
 
         // Process all content previously stored in the table cell.
-        string rst_content = _table_cell_rst[column];
         stringstream ss(rst_content);
         process_input_stream(ss, output_stream);
 
