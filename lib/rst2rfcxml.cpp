@@ -697,7 +697,7 @@ rst2rfcxml::output_table_row(ostream& output_stream)
         string rst_content = _table_cell_rst[column];
         size_t offset = rst_content.find_first_not_of(" ");
         string attributes;
-        if (offset > 0) {
+        if (offset != std::string::npos && offset > 0) {
             rst_content = rst_content.substr(offset);
             attributes = "align=\"center\"";
         }
