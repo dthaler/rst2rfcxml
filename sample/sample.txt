@@ -4,8 +4,8 @@
 
 Network Working Group                                        J. Doe, Ed.
 Internet-Draft                                                      ACME
-Intended status: Standards Track                         3 February 2023
-Expires: 7 August 2023
+Intended status: Standards Track                           20 April 2024
+Expires: 22 October 2024
 
 
                          Sample Document Title
@@ -32,11 +32,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 August 2023.
+   This Internet-Draft will expire on 22 October 2024.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Doe                       Expires 7 August 2023                 [Page 1]
+Doe                      Expires 22 October 2024                [Page 1]
 
-Internet-Draft          Sample Abbreviated Title           February 2023
+Internet-Draft          Sample Abbreviated Title              April 2024
 
 
 Table of Contents
@@ -64,14 +64,17 @@ Table of Contents
      1.1.  Unnumbered list . . . . . . . . . . . . . . . . . . . . .   2
      1.2.  Numbered list . . . . . . . . . . . . . . . . . . . . . .   2
      1.3.  Definition list . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Emphasis  . . . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Emphasis  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  Blocks  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
      4.1.  Code blocks . . . . . . . . . . . . . . . . . . . . . . .   3
      4.2.  Block quotes  . . . . . . . . . . . . . . . . . . . . . .   3
-   5.  Tables  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   6.  Normative References  . . . . . . . . . . . . . . . . . . . .   3
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     4.3.  Literal blocks  . . . . . . . . . . . . . . . . . . . . .   3
+   5.  Tables  . . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .   4
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   4
 
 1.  Lists
 
@@ -102,17 +105,18 @@ Table of Contents
    where structures are represented in a C-style format with types such
    as Elf64_Word for an unsigned 64-bit integer.
 
+
+
+
+
+Doe                      Expires 22 October 2024                [Page 2]
+
+Internet-Draft          Sample Abbreviated Title              April 2024
+
+
 2.  Emphasis
 
    Fixed-width term: term
-
-
-
-
-Doe                       Expires 7 August 2023                 [Page 2]
-
-Internet-Draft          Sample Abbreviated Title           February 2023
-
 
    Bold term: *term*
 
@@ -124,6 +128,9 @@ Internet-Draft          Sample Abbreviated Title           February 2023
 
    External reference: External reference text [SAMPLE].
 
+   External reference to an Internet Draft: External reference text
+   [DRAFT].
+
 4.  Blocks
 
 4.1.  Code blocks
@@ -131,9 +138,9 @@ Internet-Draft          Sample Abbreviated Title           February 2023
    The following is a code block followed by a definition list to define
    fields:
 
-       typedef struct {
-          int sample;
-       } sample_t;
+   typedef struct {
+      int sample;
+   } sample_t;
 
    sample  Definition of the sample field.
 
@@ -142,6 +149,26 @@ Internet-Draft          Sample Abbreviated Title           February 2023
    Following is a block quote:
 
    |  This is quoted text that goes in a block quote.
+
+4.3.  Literal blocks
+
+   Following is a literal block:
+
+          This is text
+   that goes in a literal block.
+
+
+
+
+
+
+
+
+
+Doe                      Expires 22 October 2024                [Page 3]
+
+Internet-Draft          Sample Abbreviated Title              April 2024
+
 
 5.  Tables
 
@@ -155,20 +182,20 @@ Internet-Draft          Sample Abbreviated Title           February 2023
 
                                   Table 1
 
-6.  Normative References
+6.  References
+
+6.1.  Normative References
 
    [SAMPLE]   "Sample Reference Title", <https://example.com/path>.
 
+6.2.  Informative References
+
+   [DRAFT]    Thaler, D. and J. Doe, "Sample Title", Work in Progress,
+              Internet-Draft, draft-thaler-bpf-isa-00, DOI 0/0,
+              <https://datatracker.ietf.org/doc/html/draft-thaler-bpf-
+              isa-00>.
+
 Author's Address
-
-
-
-
-
-Doe                       Expires 7 August 2023                 [Page 3]
-
-Internet-Draft          Sample Abbreviated Title           February 2023
-
 
    John Doe (editor)
    ACME
@@ -194,31 +221,4 @@ Internet-Draft          Sample Abbreviated Title           February 2023
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Doe                       Expires 7 August 2023                 [Page 4]
+Doe                      Expires 22 October 2024                [Page 4]

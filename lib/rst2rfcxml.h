@@ -63,11 +63,17 @@ struct author
     std::vector<std::string> postalLine;
 };
 
+struct seriesinfo
+{
+    std::string name;
+    std::string value;
+};
+
 struct reference
 {
     std::string anchor;
-    std::string seriesInfoName;
-    std::string seriesInfoValue;
+    std::map<std::string, author> authors;
+    std::vector<seriesinfo> seriesinfos;
     std::string title;
     std::string target;
     std::string type;
@@ -90,7 +96,7 @@ class rst2rfcxml
 
   private:
     author&
-    get_author_by_anchor(std::string anchor);
+    get_author_by_anchor(std::map<std::string, author>& map, std::string anchor);
     reference&
     get_reference_by_anchor(std::string anchor);
     reference*
