@@ -719,6 +719,21 @@ rst2rfcxml::handle_variable_initializations(string line)
         author.surname = match.suffix().str();
         return true;
     }
+    if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].date.day\\| replace:: "))) {
+        reference& reference = get_reference_by_anchor(match[1]);
+        reference.date.day = match.suffix().str();
+        return true;
+    }
+    if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].date.month\\| replace:: "))) {
+        reference& reference = get_reference_by_anchor(match[1]);
+        reference.date.month = match.suffix().str();
+        return true;
+    }
+    if (regex_search(line.c_str(), match, regex("^.. \\|ref\\[([\\w-]+)\\].date.year\\| replace:: "))) {
+        reference& reference = get_reference_by_anchor(match[1]);
+        reference.date.year = match.suffix().str();
+        return true;
+    }
 
     return false;
 }
@@ -1248,6 +1263,16 @@ rst2rfcxml::output_references(ostream& output_stream, string type, string title)
                 }
                 output_stream << "/>" << endl;   
             }
+        }
+        if (!reference.date.year.empty()) {
+            output_stream << "    <date";
+            if (!reference.date.month.empty()) {
+                if (!reference.date.day.empty()) {
+                    output_stream << " day=\"" << reference.date.day << "\"";
+                }
+                output_stream << " month=\"" << reference.date.month << "\"";
+            }
+            output_stream << " year=\"" << reference.date.year << "\"/>" << endl;
         }
         output_stream << "   </front>" << endl;
         for (auto& seriesInfo : reference.seriesinfos) {

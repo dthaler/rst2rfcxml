@@ -69,6 +69,13 @@ struct seriesinfo
     std::string value;
 };
 
+struct reference_date
+{
+    std::string day;
+    std::string month;
+    std::string year;
+};
+
 struct reference
 {
     std::string anchor;
@@ -77,6 +84,7 @@ struct reference
     std::string title;
     std::string target;
     std::string type;
+    reference_date date;
     int use_count = 0;
 };
 

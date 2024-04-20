@@ -191,9 +191,9 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 6.2.  Informative References
 
    [DRAFT]    Thaler, D. and J. Doe, "Sample Title", Work in Progress,
-              Internet-Draft, draft-thaler-bpf-isa-00, DOI 0/0,
-              <https://datatracker.ietf.org/doc/html/draft-thaler-bpf-
-              isa-00>.
+              Internet-Draft, draft-thaler-bpf-isa-00, DOI 0/0, April
+              2024, <https://datatracker.ietf.org/doc/html/draft-thaler-
+              bpf-isa-00>.
 
 Author's Address
 

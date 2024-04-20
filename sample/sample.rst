@@ -71,6 +71,8 @@ External reference: `External reference text <https://example.com/path>`_.
 .. |ref[DRAFT].seriesInfo.value| replace:: 0/0
 .. |ref[DRAFT].target| replace:: instruction-set.rst
 .. |ref[DRAFT].type| replace:: informative
+.. |ref[DRAFT].date.month| replace:: April
+.. |ref[DRAFT].date.year| replace:: 2024
 
 External reference to an Internet Draft: `External reference text <instruction-set.rst>`_.
 

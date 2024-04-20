@@ -180,6 +180,9 @@ portion as follows:
 * `ref[<anchor>].author[<anchor>].surname`: Author surname.
 * `ref[<anchor>].seriesInfo.name`: Series info name.  Must be set to `RFC`, `Internet-Draft`, or `DOI`.
 * `ref[<anchor>].seriesInfo.value`: Series info value.  See [Section 2.47 of RFC 7991](https://www.rfc-editor.org/rfc/rfc7991#section-2.47).
+* `ref[<anchor>].date.day`: Optional day of publication.
+* `ref[<anchor>].date.month`: Optional month of publication.
+* `ref[<anchor>].date.year`: Year of publication.
 
 Example:
 
@@ -192,6 +195,8 @@ Example:
 .. |ref[SAMPLE].author[0].surname| replace:: Doe
 .. |ref[SAMPLE].seriesInfo.name| replace:: Internet-Draft
 .. |ref[SAMPLE].seriesInfo.value| replace:: draft-ietf-sample-name-00
+.. |ref[SAMPLE].date.month| replace:: April
+.. |ref[SAMPLE].date.year| replace:: 2024
 ```
 
 ## Sample Files
