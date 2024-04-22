@@ -4,8 +4,8 @@
 
 Network Working Group                                        J. Doe, Ed.
 Internet-Draft                                                      ACME
-Intended status: Standards Track                           20 April 2024
-Expires: 22 October 2024
+Intended status: Standards Track                           22 April 2024
+Expires: 24 October 2024
 
 
                          Sample Document Title
@@ -14,8 +14,6 @@ Expires: 22 October 2024
 Abstract
 
    This is the abstract.
-
-   It can contain multiple paragraphs.
 
 Status of This Memo
 
@@ -32,7 +30,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 October 2024.
+   This Internet-Draft will expire on 24 October 2024.
 
 Copyright Notice
 
@@ -48,37 +46,42 @@ Copyright Notice
    described in Section 4.e of the Trust Legal Provisions and are
    provided without warranty as described in the Revised BSD License.
 
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Lists . . . . . . . . . . . . . . . . . . . . . . . . . . . .   2
 
 
 
-
-
-Doe                      Expires 22 October 2024                [Page 1]
+Doe                      Expires 24 October 2024                [Page 1]
 
 Internet-Draft          Sample Abbreviated Title              April 2024
 
 
-Table of Contents
-
-   1.  Lists . . . . . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Unnumbered list . . . . . . . . . . . . . . . . . . . . .   2
-     1.2.  Numbered list . . . . . . . . . . . . . . . . . . . . . .   2
-     1.3.  Definition list . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Emphasis  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   4.  Blocks  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     4.1.  Code blocks . . . . . . . . . . . . . . . . . . . . . . .   3
-     4.2.  Block quotes  . . . . . . . . . . . . . . . . . . . . . .   3
-     4.3.  Literal blocks  . . . . . . . . . . . . . . . . . . . . .   3
-   5.  Tables  . . . . . . . . . . . . . . . . . . . . . . . . . . .   4
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
-     6.2.  Informative References  . . . . . . . . . . . . . . . . .   4
+     2.1.  Unnumbered list . . . . . . . . . . . . . . . . . . . . .   2
+     2.2.  Numbered list . . . . . . . . . . . . . . . . . . . . . .   2
+     2.3.  Definition list . . . . . . . . . . . . . . . . . . . . .   2
+   3.  Emphasis  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   5.  Blocks  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     5.1.  Code blocks . . . . . . . . . . . . . . . . . . . . . . .   3
+     5.2.  Block quotes  . . . . . . . . . . . . . . . . . . . . . .   3
+     5.3.  Literal blocks  . . . . . . . . . . . . . . . . . . . . .   3
+   6.  Tables  . . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .   4
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   4
 
-1.  Lists
+1.  Introduction
 
-1.1.  Unnumbered list
+   This is the introduction.
+
+   It can contain multiple paragraphs.
+
+2.  Lists
+
+2.1.  Unnumbered list
 
    The following is an unnumbered list:
 
@@ -86,7 +89,7 @@ Table of Contents
 
    *  Second
 
-1.2.  Numbered list
+2.2.  Numbered list
 
    The following is a numbered list using decimal numbers:
 
@@ -94,7 +97,7 @@ Table of Contents
 
    2.  Second
 
-1.3.  Definition list
+2.3.  Definition list
 
    The following is a definition list:
 
@@ -102,19 +105,19 @@ Table of Contents
 
    second  Description of another term.
 
-   where structures are represented in a C-style format with types such
-   as Elf64_Word for an unsigned 64-bit integer.
 
 
 
 
-
-Doe                      Expires 22 October 2024                [Page 2]
+Doe                      Expires 24 October 2024                [Page 2]
 
 Internet-Draft          Sample Abbreviated Title              April 2024
 
 
-2.  Emphasis
+   where structures are represented in a C-style format with types such
+   as Elf64_Word for an unsigned 64-bit integer.
+
+3.  Emphasis
 
    Fixed-width term: term
 
@@ -122,18 +125,18 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
    Italics term: _term_
 
-3.  References
+4.  References
 
-   Internal reference: References (Section 3)
+   Internal reference: References (Section 4)
 
    External reference: External reference text [SAMPLE].
 
    External reference to an Internet Draft: External reference text
    [DRAFT].
 
-4.  Blocks
+5.  Blocks
 
-4.1.  Code blocks
+5.1.  Code blocks
 
    The following is a code block followed by a definition list to define
    fields:
@@ -144,13 +147,13 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
    sample  Definition of the sample field.
 
-4.2.  Block quotes
+5.2.  Block quotes
 
    Following is a block quote:
 
    |  This is quoted text that goes in a block quote.
 
-4.3.  Literal blocks
+5.3.  Literal blocks
 
    Following is a literal block:
 
@@ -162,15 +165,12 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
 
 
-
-
-
-Doe                      Expires 22 October 2024                [Page 3]
+Doe                      Expires 24 October 2024                [Page 3]
 
 Internet-Draft          Sample Abbreviated Title              April 2024
 
 
-5.  Tables
+6.  Tables
 
                      +======+=======+================+
                      | name | value | notes          |
@@ -182,13 +182,13 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
                                   Table 1
 
-6.  References
+7.  References
 
-6.1.  Normative References
+7.1.  Normative References
 
    [SAMPLE]   "Sample Reference Title", <https://example.com/path>.
 
-6.2.  Informative References
+7.2.  Informative References
 
    [DRAFT]    Thaler, D. and J. Doe, "Sample Title", Work in Progress,
               Internet-Draft, draft-thaler-bpf-isa-00, DOI 0/0, April
@@ -221,4 +221,4 @@ Author's Address
 
 
 
-Doe                      Expires 22 October 2024                [Page 4]
+Doe                      Expires 24 October 2024                [Page 4]

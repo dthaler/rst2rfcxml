@@ -162,6 +162,7 @@ class rst2rfcxml
     std::map<std::string, author> _authors;
     std::string _submission_type;
     std::string _abbreviated_title;
+    std::string _abstract;
     std::stack<xml_context> _contexts;
     std::map<std::string, std::string> _rst_references;
     std::map<std::string, reference> _xml_references;

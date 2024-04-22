@@ -568,6 +568,7 @@ rst2rfcxml::handle_variable_initializations(string line)
         _handle_variable_initialization(line, "docName", _document_name) ||
         _handle_variable_initialization(line, "ipr", _ipr) ||
         _handle_variable_initialization(line, "submissionType", _submission_type) ||
+        _handle_variable_initialization(line, "abstract", _abstract) ||
         _handle_variable_initialization(line, "titleAbbr", _abbreviated_title)) {
         return true;
     }
@@ -881,6 +882,12 @@ rst2rfcxml::handle_section_title(int level, string marker, string current, strin
         // Current line is a section heading.
         pop_contexts(BASE_SECTION_LEVEL + level - 1, output_stream);
         if (in_context(xml_context::FRONT)) {
+            output_authors(output_stream);
+            if (!_abstract.empty()) {
+                push_context(output_stream, xml_context::ABSTRACT, current_indentation);
+                push_context(output_stream, xml_context::TEXT, current_indentation);
+                output_stream << "    " << _abstract << endl;
+            }
             pop_contexts(1, output_stream);
             push_context(output_stream, xml_context::MIDDLE);
         }
@@ -1175,8 +1182,8 @@ rst2rfcxml::output_line(string indented_line, ostream& output_stream)
             !in_context(xml_context::LIST_ELEMENT) && !in_context(xml_context::SOURCE_CODE) &&
             !in_context(xml_context::TEXT)) {
             if (in_context(xml_context::FRONT)) {
-                output_authors(output_stream);
-                push_context(output_stream, xml_context::ABSTRACT, current_indentation);
+                pop_contexts_until(xml_context::FRONT, output_stream);
+                handle_section_title(1, "=", "Introduction", "============", output_stream);
             }
             if (in_context(xml_context::DEFINITION_LIST) || in_context(xml_context::UNORDERED_LIST) ||
                 in_context(xml_context::ORDERED_LIST)) {

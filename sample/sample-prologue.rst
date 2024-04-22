@@ -2,6 +2,7 @@
 .. |ipr| replace:: trust200902
 .. |category| replace:: std
 .. |titleAbbr| replace:: Sample Abbreviated Title
+.. |abstract| replace:: This is the abstract.
 .. |submissionType| replace:: IETF
 .. |baseTargetUri| replace:: http://example.com/path
 .. |author[0].fullname| replace:: John Doe
