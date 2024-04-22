@@ -37,12 +37,17 @@ Sample Document Title
    <t>
     This is the abstract.
    </t>
-   <t>
-    It can contain multiple paragraphs.
-   </t>
   </abstract>
  </front>
  <middle>
+  <section anchor="introduction" title="Introduction">
+   <t>
+    This is the introduction.
+   </t>
+   <t>
+    It can contain multiple paragraphs.
+   </t>
+  </section>
   <section anchor="lists" title="Lists">
    <section anchor="unnumbered-list" title="Unnumbered list">
     <t>

@@ -5,7 +5,7 @@
 Sample Document Title
 =====================
 
-This is the abstract.
+This is the introduction.
 
 It can contain multiple paragraphs.
 

@@ -109,6 +109,7 @@ where `<name>` is a string defined below, and `<value>` is the value to set it t
 * `titleAbbr`: Abbreviated title to appear in the page header.
 * `submissionType`: The stream name, such as `IETF`.
 * `baseTargetUri`: Base URI for any external references whose target is a relative URI reference.
+* `abstract`: Text of abstract.
 
 Example:
 
@@ -198,6 +199,11 @@ Example:
 .. |ref[SAMPLE].date.month| replace:: April
 .. |ref[SAMPLE].date.year| replace:: 2024
 ```
+
+### Introduction
+
+Any text under the title in an RST file and above any subsequent section header
+is considered to be part of an Introduction section that will be added.
 
 ## Sample Files
 
