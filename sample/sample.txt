@@ -4,8 +4,8 @@
 
 Network Working Group                                        J. Doe, Ed.
 Internet-Draft                                                      ACME
-Intended status: Standards Track                           22 April 2024
-Expires: 24 October 2024
+Intended status: Standards Track                             17 May 2024
+Expires: 18 November 2024
 
 
                          Sample Document Title
@@ -30,7 +30,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 October 2024.
+   This Internet-Draft will expire on 18 November 2024.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Table of Contents
 
 
 
-Doe                      Expires 24 October 2024                [Page 1]
+Doe                     Expires 18 November 2024                [Page 1]
 
-Internet-Draft          Sample Abbreviated Title              April 2024
+Internet-Draft          Sample Abbreviated Title                May 2024
 
 
      2.1.  Unnumbered list . . . . . . . . . . . . . . . . . . . . .   2
@@ -109,9 +109,9 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
 
 
-Doe                      Expires 24 October 2024                [Page 2]
+Doe                     Expires 18 November 2024                [Page 2]
 
-Internet-Draft          Sample Abbreviated Title              April 2024
+Internet-Draft          Sample Abbreviated Title                May 2024
 
 
    where structures are represented in a C-style format with types such
@@ -133,6 +133,8 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
    External reference to an Internet Draft: External reference text
    [DRAFT].
+
+   External reference to an RFC: [RFC2119].
 
 5.  Blocks
 
@@ -163,11 +165,9 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 
 
 
-
-
-Doe                      Expires 24 October 2024                [Page 3]
+Doe                     Expires 18 November 2024                [Page 3]
 
-Internet-Draft          Sample Abbreviated Title              April 2024
+Internet-Draft          Sample Abbreviated Title                May 2024
 
 
 6.  Tables
@@ -185,6 +185,11 @@ Internet-Draft          Sample Abbreviated Title              April 2024
 7.  References
 
 7.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
 
    [SAMPLE]   "Sample Reference Title", <https://example.com/path>.
 
@@ -216,9 +221,4 @@ Author's Address
 
 
 
-
-
-
-
-
-Doe                      Expires 24 October 2024                [Page 4]
+Doe                     Expires 18 November 2024                [Page 4]

@@ -76,6 +76,23 @@ External reference: `External reference text <https://example.com/path>`_.
 
 External reference to an Internet Draft: `External reference text <instruction-set.rst>`_.
 
+.. |ref[RFC2119].title| replace:: Key words for use in RFCs to Indicate Requirement Levels
+.. |ref[RFC2119].author[0].fullname| replace:: S. Bradner
+.. |ref[RFC2119].author[0].initials| replace:: S.
+.. |ref[RFC2119].author[0].surname| replace:: Bradner
+.. |ref[RFC2119].seriesInfo.name| replace:: BCP
+.. |ref[RFC2119].seriesInfo.value| replace:: 14
+.. |ref[RFC2119].seriesInfo.name| replace:: RFC
+.. |ref[RFC2119].seriesInfo.value| replace:: 2119
+.. |ref[RFC2119].seriesInfo.name| replace:: DOI
+.. |ref[RFC2119].seriesInfo.value| replace:: 10.17487/RFC2119
+.. |ref[RFC2119].target| replace:: https://www.rfc-editor.org/info/rfc2119
+.. |ref[RFC2119].type| replace:: normative
+.. |ref[RFC2119].date.month| replace:: March
+.. |ref[RFC2119].date.year| replace:: 1997
+
+External reference to an RFC: `<https://www.rfc-editor.org/info/rfc2119>`_.
+
 Blocks
 ======
 
