@@ -124,6 +124,9 @@ Sample Document Title
    <t>
     External reference to an Internet Draft: <xref target="DRAFT">External reference text</xref>.
    </t>
+   <t>
+    External reference to an RFC: <xref target="RFC2119"></xref>.
+   </t>
   </section>
   <section anchor="blocks" title="Blocks">
    <section anchor="code-blocks" title="Code blocks">
@@ -215,6 +218,16 @@ that goes in a literal block.
  </middle>
  <back>
  <references><name>Normative References</name>
+  <reference anchor="RFC2119">
+   <front>
+    <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+    <author fullname="S. Bradner" initials="S." surname="Bradner"/>
+    <date month="March" year="1997"/>
+   </front>
+   <seriesInfo name='BCP' value='14'/>
+   <seriesInfo name='RFC' value='2119'/>
+   <seriesInfo name='DOI' value='10.17487/RFC2119'/>
+  </reference>
   <reference anchor="SAMPLE" target="https://example.com/path">
    <front>
     <title>Sample Reference Title</title>
