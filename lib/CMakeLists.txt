@@ -5,6 +5,7 @@ endif()
 
 include_directories(../external/fmt/include)
 include_directories(../external)
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_library(lib STATIC "rst2rfcxml.h" "rst2rfcxml.cpp")
 
