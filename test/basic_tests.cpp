@@ -900,6 +900,73 @@ TEST_CASE("table with caption", "[basic]")
 )");
 }
 
+TEST_CASE("indented table with caption", "[basic]")
+{
+    test_rst2rfcxml(
+        R"(
+**term**
+  definition
+
+  .. table:: Caption.
+
+    ====  ===============
+    Name  Description
+    ====  ===============
+    Foo   Example
+    Bar   Another example
+          Second line
+    ====  ===============
+
+)",
+        R"(<dl>
+ <dt anchor="term---term--">
+  <strong>term</strong>
+ </dt>
+ <dd>
+  <t>
+   definition
+  </t>
+  <table>
+   <name>Caption.</name>
+   <thead>
+    <tr>
+     <th>Name</th>
+     <th>Description</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      <t>
+       Foo
+      </t>
+     </td>
+     <td>
+      <t>
+       Example
+      </t>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <t>
+       Bar
+      </t>
+     </td>
+     <td>
+      <t>
+       Another example
+       Second line
+      </t>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </dd>
+</dl>
+)");
+}
+
 TEST_CASE("definition list with table", "[basic]")
 {
     test_rst2rfcxml(
