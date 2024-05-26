@@ -1003,6 +1003,16 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
         return 0;
     }
+    if (current_indentation != string::npos) {
+        auto current_piece = current.substr(current_indentation);
+        if (current_piece.starts_with(".. table:: ")) {
+            push_context(output_stream, xml_context::TABLE, current_indentation + 1);
+            string name = handle_escapes_and_links(current_piece.substr(11));
+            output_stream << fmt::format("{}<name>{}</name>", _spaces(_contexts.size()), name) << endl;
+            push_context(output_stream, xml_context::CONSUME_BLANK_LINE);
+            return 0;
+        }
+    }
     if (current.starts_with(".. include:: ")) {
         string filename = current.substr(13);
         filesystem::path relative_path = filesystem::relative(filename);
