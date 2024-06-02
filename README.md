@@ -1,4 +1,6 @@
 # rst2rfcxml
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dthaler/rst2rfcxml/badge)](https://scorecard.dev/viewer/?uri=github.com/dthaler/rst2rfcxml)
+
 Convert [reStructured Text (RST)](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html)
 to [xml2rfc Version 3](https://www.rfc-editor.org/rfc/rfc7991).
 
