@@ -23,6 +23,6 @@ updates:
       interval: "weekly"
       day: "saturday"
     groups:
-      actions:
+      submodules:
         patterns:
           - "*"
