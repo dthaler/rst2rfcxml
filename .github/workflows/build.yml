@@ -98,7 +98,7 @@ jobs:
     strategy:
       matrix:
         configurations: [Debug, Release]
-    runs-on: macos-12
+    runs-on: macos-14
     env:
       # Configuration type to build.  For documentation on how build matrices work, see
       # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
