@@ -1023,6 +1023,10 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
         }
 
         filesystem::path relative_path = filesystem::relative(filename);
+        if (relative_path.empty()) {
+            std::cerr << fmt::format("ERROR: {} does not exist", filename) << endl;
+            return 1;
+        }
         filesystem::path input_filename = filesystem::absolute(relative_path);
 
         // Recursively process filename.
