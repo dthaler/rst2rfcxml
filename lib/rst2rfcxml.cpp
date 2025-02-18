@@ -1015,7 +1015,18 @@ rst2rfcxml::process_line(string current, string next, ostream& output_stream)
     }
     if (current.starts_with(".. include:: ")) {
         string filename = current.substr(13);
+
+        // Check if filename contains path separators.
+        if (filename.find('/') != string::npos || filename.find('\\') != string::npos) {
+            std::cerr << fmt::format("ERROR: filename {} contains a path separator", filename) << endl;
+            return 1;
+        }
+
         filesystem::path relative_path = filesystem::relative(filename);
+        if (relative_path.empty()) {
+            std::cerr << fmt::format("ERROR: {} does not exist", filename) << endl;
+            return 1;
+        }
         filesystem::path input_filename = filesystem::absolute(relative_path);
 
         // Recursively process filename.

@@ -29,12 +29,13 @@ constexpr const char* BASIC_PREAMBLE = R"(<?xml version="1.0" encoding="UTF-8"?>
 )";
 
 void
-test_rst2rfcxml(const char* input, const char* expected_output)
+test_rst2rfcxml(const char* input, const char* expected_output, int expected_error = 0)
 {
     rst2rfcxml rst2rfcxml;
     istringstream is(input);
     ostringstream os;
-    rst2rfcxml.process_input_stream(is, os);
+    int error = rst2rfcxml.process_input_stream(is, os);
+    REQUIRE(error == expected_error);
     rst2rfcxml.pop_contexts(0, os);
     string actual_output = os.str();
     REQUIRE(actual_output == expected_output);
@@ -1519,4 +1520,25 @@ TEST_CASE("sample with skeleton", "[basic]")
         (std::istreambuf_iterator<char>(expected_output_file)), std::istreambuf_iterator<char>());
 
     REQUIRE(actual_output == expected_output);
+}
+
+TEST_CASE("include out of directory", "[include]")
+{
+    string expected_output = BASIC_PREAMBLE;
+    test_rst2rfcxml(
+        R"(
+.. include:: ../sample/sample.rst
+)",
+        "",
+        1);
+}
+
+TEST_CASE("include non-existent", "[include]")
+{
+    test_rst2rfcxml(
+        R"(
+.. include:: non-existent.rst
+)",
+        "",
+        1);
 }
