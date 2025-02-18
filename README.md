@@ -69,9 +69,9 @@ $ xml2rfc --html draft-thaler-sample-00.xml
 $ firefox draft-thaler-sample-00.html
 ```
 
-However the include directive can be used instead by having a "skeleton" file that
-includes the main RST file at an appropriate point.  Thus, conversion to an Internet-Draft
-might be done as follows:
+However the `include directive can be used instead by having a "skeleton" file that
+includes the main RST file, which must be in the same directory, at an appropriate
+point.  Thus, conversion to an Internet-Draft might be done as follows:
 
 ```
 $ rst2rfcxml sample-skeleton.rst -o draft-thaler-sample-00.xml
