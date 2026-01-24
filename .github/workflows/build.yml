@@ -28,7 +28,7 @@ jobs:
           cancel_others: 'false'
           paths_ignore: '["**.md"]'
 
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
         if: steps.skip_check.outputs.should_skip != 'true'
         with:
           submodules: 'recursive'
@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: Ubuntu ${{matrix.configurations}} rst2rfcxml
           path: ${{github.workspace}}/build/rst2rfcxml/rst2rfcxml
@@ -70,7 +70,7 @@ jobs:
           cancel_others: 'false'
           paths_ignore: '["**.md"]'
 
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
         if: steps.skip_check.outputs.should_skip != 'true'
         with:
           submodules: 'recursive'
@@ -88,7 +88,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: Windows ${{matrix.configurations}} rst2rfcxml.exe
           path: ${{github.workspace}}/build/rst2rfcxml/${{env.BUILD_CONFIGURATION}}/rst2rfcxml.exe
@@ -111,7 +111,7 @@ jobs:
           cancel_others: 'false'
           paths_ignore: '["**.md"]'
 
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
         if: steps.skip_check.outputs.should_skip != 'true'
         with:
           submodules: 'recursive'
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: MacOS ${{matrix.configurations}} rst2rfcxml
           path: ${{github.workspace}}/build/rst2rfcxml/rst2rfcxml
