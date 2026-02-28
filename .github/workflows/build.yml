@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: Ubuntu ${{matrix.configurations}} rst2rfcxml
           path: ${{github.workspace}}/build/rst2rfcxml/rst2rfcxml
@@ -88,7 +88,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: Windows ${{matrix.configurations}} rst2rfcxml.exe
           path: ${{github.workspace}}/build/rst2rfcxml/${{env.BUILD_CONFIGURATION}}/rst2rfcxml.exe
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload rst2rfcxml binary
         if: steps.skip_check.outputs.should_skip != 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: MacOS ${{matrix.configurations}} rst2rfcxml
           path: ${{github.workspace}}/build/rst2rfcxml/rst2rfcxml
